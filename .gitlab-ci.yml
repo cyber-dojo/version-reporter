@@ -17,13 +17,14 @@ create-kosli-flow:
 build-job:
   stage: build
   script:
+    - ./sh/install_docker_compose.sh
     - source ./sh/echo_versioner_env_vars.sh
     - export $(echo_versioner_env_vars)
     - docker-compose build --build-arg COMMIT_SHA=$CI_COMMIT_SHA
     - TAG=$(echo $CI_COMMIT_SHA | cut -c1-7)
     # DOCKER_USER, DOCKER_PASS secrets
     # echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
-    # docker push cyberdojo/version-reporter:$TAG 
+    # docker push cyberdojo/version-reporter:$TAG
     # ./sh/install_kosli.sh
     # kosli report artifact cyberdojo/version-reporter:$TAG --artifact-type=docker
 
