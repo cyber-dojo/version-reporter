@@ -14,9 +14,8 @@ create-kosli-flow:
     - apt install ca-certificates
     - apt update
     - apt install kosli="$KOSLI_CLI_VERSION"
-      # Verify kosli installation worked
-    - kosli version
     - kosli create flow $KOSLI_FLOW 
+            --api-token=$KOSLI_API_TOKEN
             --description="UX for git+image version-reporter" 
             --template=artifact,branch-coverage,snyk-scan
 
