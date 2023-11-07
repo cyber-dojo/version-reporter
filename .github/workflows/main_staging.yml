@@ -11,7 +11,7 @@ env:
   KOSLI_HOST: "https://staging.app.kosli.com"
   KOSLI_ORG: cyber-dojo
   KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
-  KOSLI_FLOW: shas
+  KOSLI_FLOW: version-reporter
 
 jobs:
 
@@ -68,13 +68,13 @@ jobs:
       - name: Report image to Kosli flow
         run: |
           IMAGE_TAG="$(echo $GITHUB_SHA | head -c7)"           
-          docker pull cyberdojo/shas:${IMAGE_TAG}          
-          kosli report artifact cyberdojo/shas:${IMAGE_TAG} \
+          docker pull cyberdojo/version-reporter:${IMAGE_TAG}          
+          kosli report artifact cyberdojo/version-reporter:${IMAGE_TAG} \
             --artifact-type=docker
 
   test:
     needs: [setup-ci-vars, wait-for-image]
-    uses: cyber-dojo/shas/.github/workflows/sub_test.yml@main
+    uses: cyber-dojo/version-reporter/.github/workflows/sub_test.yml@main
     secrets:
       KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -88,7 +88,7 @@ jobs:
 
   expected-deployment:
     needs: [setup-ci-vars, test]
-    uses: cyber-dojo/shas/.github/workflows/sub_expect_deployment.yml@main
+    uses: cyber-dojo/version-reporter/.github/workflows/sub_expect_deployment.yml@main
     secrets:
       KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
     with:

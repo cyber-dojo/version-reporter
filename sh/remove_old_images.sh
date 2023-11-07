@@ -5,8 +5,8 @@ set -Eeu
 remove_old_images()
 {
   local -r dil=$(docker image ls --format "{{.Repository}}:{{.Tag}}")
-  remove_all_but_latest "${dil}" "${CYBER_DOJO_SHAS_CLIENT_IMAGE}"
-  remove_all_but_latest "${dil}" "${CYBER_DOJO_SHAS_IMAGE}"
+  remove_all_but_latest "${dil}" "${CYBER_DOJO_VERSION_REPORTER_CLIENT_IMAGE}"
+  remove_all_but_latest "${dil}" "${CYBER_DOJO_VERSION_REPORTER_IMAGE}"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - -

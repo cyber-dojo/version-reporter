@@ -18,11 +18,11 @@ build_images()
 #- - - - - - - - - - - - - - - - - - - - - - - -
 tag_images_to_latest()
 {
-  docker tag ${CYBER_DOJO_SHAS_IMAGE}:$(git_commit_tag)        ${CYBER_DOJO_SHAS_IMAGE}:latest
-  docker tag ${CYBER_DOJO_SHAS_CLIENT_IMAGE}:$(git_commit_tag) ${CYBER_DOJO_SHAS_CLIENT_IMAGE}:latest
+  docker tag ${CYBER_DOJO_VERSION_REPORTER_IMAGE}:$(git_commit_tag)        ${CYBER_DOJO_VERSION_REPORTER_IMAGE}:latest
+  docker tag ${CYBER_DOJO_VERSION_REPORTER_CLIENT_IMAGE}:$(git_commit_tag) ${CYBER_DOJO_VERSION_REPORTER_CLIENT_IMAGE}:latest
   echo
-  echo "echo CYBER_DOJO_SHAS_SHA=$(git_commit_sha)"
-  echo "echo CYBER_DOJO_SHAS_TAG=$(git_commit_tag)"
+  echo "echo CYBER_DOJO_VERSION_REPORTER_SHA=$(git_commit_sha)"
+  echo "echo CYBER_DOJO_VERSION_REPORTER_TAG=$(git_commit_tag)"
   echo
 }
 

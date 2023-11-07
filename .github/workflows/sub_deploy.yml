@@ -79,9 +79,9 @@ jobs:
 
       - name: Push image to private beta-ECR
         run: |
-          docker pull cyberdojo/shas:${{ env.IMAGE_TAG }}
-          docker tag cyberdojo/shas:${{ env.IMAGE_TAG }} ${{ needs.setup-ci-vars.outputs.ecr_registry_beta }}/shas:${{ env.IMAGE_TAG }}
-          docker push ${{ needs.setup-ci-vars.outputs.ecr_registry_beta }}/shas:${{ env.IMAGE_TAG }}
+          docker pull cyberdojo/version-reporter:${{ env.IMAGE_TAG }}
+          docker tag cyberdojo/version-reporter:${{ env.IMAGE_TAG }} ${{ needs.setup-ci-vars.outputs.ecr_registry_beta }}/version-reporter:${{ env.IMAGE_TAG }}
+          docker push ${{ needs.setup-ci-vars.outputs.ecr_registry_beta }}/version-reporter:${{ env.IMAGE_TAG }}
 
       - name: Setup Kosli CLI
         uses: kosli-dev/setup-cli-action@v2
@@ -90,7 +90,7 @@ jobs:
 
       - name: Report expected aws-beta deployment to Kosli
         run:
-          kosli expect deployment cyberdojo/shas:${{ env.IMAGE_TAG }}
+          kosli expect deployment cyberdojo/version-reporter:${{ env.IMAGE_TAG }}
             --artifact-type=docker
             --description="Deployed to aws-beta in Github Actions pipeline"
             --environment=aws-beta
@@ -109,7 +109,7 @@ jobs:
       working_directory: deployment/terraform/
       tf_apply: 'true'
       tf_version: v1.4.5
-      tf_additional_env_vars: '{"TF_VAR_TAGGED_IMAGE": "${{ needs.setup-ci-vars.outputs.ecr_registry_beta }}/shas:${{ needs.setup-ci-vars.outputs.image_tag }}"}'
+      tf_additional_env_vars: '{"TF_VAR_TAGGED_IMAGE": "${{ needs.setup-ci-vars.outputs.ecr_registry_beta }}/version-reporter:${{ needs.setup-ci-vars.outputs.image_tag }}"}'
 
   push-image-to-prod-ecr:
     needs: [setup-ci-vars, deploy-to-aws-beta]
@@ -132,9 +132,9 @@ jobs:
 
       - name: Push image to private prod-ECR
         run: |
-          docker pull cyberdojo/shas:${{ env.IMAGE_TAG }}
-          docker tag cyberdojo/shas:${{ env.IMAGE_TAG }} ${{ needs.setup-ci-vars.outputs.ecr_registry_prod }}/shas:${{ env.IMAGE_TAG }}
-          docker push ${{ needs.setup-ci-vars.outputs.ecr_registry_prod }}/shas:${{ env.IMAGE_TAG }}
+          docker pull cyberdojo/version-reporter:${{ env.IMAGE_TAG }}
+          docker tag cyberdojo/version-reporter:${{ env.IMAGE_TAG }} ${{ needs.setup-ci-vars.outputs.ecr_registry_prod }}/version-reporter:${{ env.IMAGE_TAG }}
+          docker push ${{ needs.setup-ci-vars.outputs.ecr_registry_prod }}/version-reporter:${{ env.IMAGE_TAG }}
 
       - name: Setup Kosli CLI
         uses: kosli-dev/setup-cli-action@v2
@@ -143,7 +143,7 @@ jobs:
 
       - name: Report expected aws-prod deployment to Kosli
         run:
-          kosli expect deployment cyberdojo/shas:${{ env.IMAGE_TAG }}
+          kosli expect deployment cyberdojo/version-reporter:${{ env.IMAGE_TAG }}
             --artifact-type=docker
             --description="Deployed to aws-prod in Github Actions pipeline"
             --environment=aws-prod
@@ -162,4 +162,4 @@ jobs:
       working_directory: deployment/terraform/
       tf_apply: 'true'
       tf_version: v1.4.5
-      tf_additional_env_vars: '{"TF_VAR_TAGGED_IMAGE": "${{ needs.setup-ci-vars.outputs.ecr_registry_prod }}/shas:${{ needs.setup-ci-vars.outputs.image_tag }}"}'
+      tf_additional_env_vars: '{"TF_VAR_TAGGED_IMAGE": "${{ needs.setup-ci-vars.outputs.ecr_registry_prod }}/version-reporter:${{ needs.setup-ci-vars.outputs.image_tag }}"}'
