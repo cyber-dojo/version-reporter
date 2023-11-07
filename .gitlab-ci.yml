@@ -1,5 +1,6 @@
 variables:
   KOSLI_DRY_RUN: "False"
+  KOSLI_CLI_VERSION: "2.6.12"
   KOSLI_HOST: "https://app.kosli.com"
   KOSLI_ORG: cyber-dojo
   KOSLI_API_TOKEN: not-the-api-token
@@ -8,12 +9,11 @@ variables:
 create-kosli-flow:
   stage: .pre
   script:
-    - whoami
     - sh -c 'echo "deb [trusted=yes] https://apt.fury.io/kosli/ /"  > /etc/apt/sources.list.d/fury.list'
       # On a clean debian container/machine, you need ca-certificates
     - apt install ca-certificates
     - apt update
-    - apt install kosli
+    - apt install kosli="$KOSLI_CLI_VERSION"
       # Verify kosli installation worked
     - kosli version
     - kosli create flow $KOSLI_FLOW 
