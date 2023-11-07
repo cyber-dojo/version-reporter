@@ -3,19 +3,12 @@ variables:
   KOSLI_CLI_VERSION: "2.6.12"
   KOSLI_HOST: "https://app.kosli.com"
   KOSLI_ORG: cyber-dojo
-  KOSLI_API_TOKEN: not-the-api-token
   KOSLI_FLOW: version-reporter
 
 create-kosli-flow:
   stage: .pre
   script:
-    - pwd
-    - ls -al
-    - sh -c 'echo "deb [trusted=yes] https://apt.fury.io/kosli/ /"  > /etc/apt/sources.list.d/fury.list'
-      # On a clean debian container/machine, you need ca-certificates
-    - apt install ca-certificates
-    - apt update
-    - apt install kosli="$KOSLI_CLI_VERSION"
+    - ./sh/install_kosli.sh
     - kosli create flow $KOSLI_FLOW 
             --api-token=$KOSLI_API_TOKEN
             --description="UX for git+image version-reporter" 
