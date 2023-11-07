@@ -2,11 +2,12 @@
 create-kosli-flow:
   stage: .pre
   script:
-    - sudo sh -c 'echo "deb [trusted=yes] https://apt.fury.io/kosli/ /"  > /etc/apt/sources.list.d/fury.list'
+    - whoami
+    - sh -c 'echo "deb [trusted=yes] https://apt.fury.io/kosli/ /"  > /etc/apt/sources.list.d/fury.list'
       # On a clean debian container/machine, you need ca-certificates
-    - sudo apt install ca-certificates
-    - sudo apt update
-    - sudo apt install kosli
+    - apt install ca-certificates
+    - apt update
+    - apt install kosli
       # Verify kosli installation worked
     - kosli version
     - kosli create flow ${{ env.KOSLI_FLOW }} 
