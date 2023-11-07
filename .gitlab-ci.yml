@@ -1,3 +1,9 @@
+variables:
+  KOSLI_DRY_RUN: "False"
+  KOSLI_HOST: "https://app.kosli.com"
+  KOSLI_ORG: cyber-dojo
+  KOSLI_API_TOKEN: not-the-api-token
+  KOSLI_FLOW: version-reporter
 
 create-kosli-flow:
   stage: .pre
@@ -10,7 +16,7 @@ create-kosli-flow:
     - apt install kosli
       # Verify kosli installation worked
     - kosli version
-    - kosli create flow ${{ env.KOSLI_FLOW }} 
+    - kosli create flow ${KOSLI_FLOW } 
             --description="UX for git+image version-reporter" 
             --template=artifact,branch-coverage,snyk-scan
 
