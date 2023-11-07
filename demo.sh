@@ -50,9 +50,9 @@ curl_200()
 }
 
 #- - - - - - - - - - - - - - - - - - - - - - - - - - -
-port() { echo -n "${CYBER_DOJO_SHAS_PORT}"; }
+port() { echo -n "${CYBER_DOJO_VERSION_REPORTER_PORT}"; }
 tab() { printf '\t'; }
-log_filename() { echo -n /tmp/shas.log ; }
+log_filename() { echo -n /tmp/version-reporter.log ; }
 
 #- - - - - - - - - - - - - - - - - - - - - - - - - - -
 build_tagged_images
@@ -71,5 +71,5 @@ echo
 if [ "${1:-}" == '--no-browser' ]; then
   containers_down
 else
-  open "http://localhost:80/shas/index"
+  open "http://localhost:80/version-reporter/index"
 fi

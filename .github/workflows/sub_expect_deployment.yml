@@ -46,8 +46,8 @@ jobs:
 
       - name: Report expected aws-beta deployment to Kosli
         run: |
-          docker pull cyberdojo/shas:${{ env.IMAGE_TAG }}          
-          kosli expect deployment cyberdojo/shas:${{ env.IMAGE_TAG }} \
+          docker pull cyberdojo/version-reporter:${{ env.IMAGE_TAG }}          
+          kosli expect deployment cyberdojo/version-reporter:${{ env.IMAGE_TAG }} \
             --artifact-type=docker \
             --description="Deployed to aws-beta in Github Actions pipeline" \
             --environment=aws-beta
@@ -62,8 +62,8 @@ jobs:
 
       - name: Report expected aws-prod deployment to Kosli
         run: |
-          docker pull cyberdojo/shas:${{ env.IMAGE_TAG }}          
-          kosli expect deployment cyberdojo/shas:${{ env.IMAGE_TAG }} \
+          docker pull cyberdojo/version-reporter:${{ env.IMAGE_TAG }}          
+          kosli expect deployment cyberdojo/version-reporter:${{ env.IMAGE_TAG }} \
             --artifact-type=docker \
             --description="Deployed to aws-prod in Github Actions pipeline" \
             --environment=aws-prod

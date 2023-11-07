@@ -28,7 +28,7 @@ class IndexTest < TestBase
 
   SERVICE_NAMES = %w(
     custom-start-points exercises-start-points languages-start-points
-    creator dashboard differ runner saver shas
+    creator dashboard differ runner saver version-reporter
   )
 
 end

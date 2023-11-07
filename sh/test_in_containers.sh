@@ -19,8 +19,8 @@ test_in_containers()
 run_client_tests()
 {
   run_tests \
-    "${CYBER_DOJO_SHAS_CLIENT_USER}" \
-    "${CYBER_DOJO_SHAS_CLIENT_CONTAINER_NAME}" \
+    "${CYBER_DOJO_VERSION_REPORTER_CLIENT_USER}" \
+    "${CYBER_DOJO_VERSION_REPORTER_CLIENT_CONTAINER_NAME}" \
     client "${@:-}";
 }
 
@@ -28,8 +28,8 @@ run_client_tests()
 run_server_tests()
 {
   run_tests \
-    "${CYBER_DOJO_SHAS_SERVER_USER}" \
-    "${CYBER_DOJO_SHAS_SERVER_CONTAINER_NAME}" \
+    "${CYBER_DOJO_VERSION_REPORTER_SERVER_USER}" \
+    "${CYBER_DOJO_VERSION_REPORTER_SERVER_CONTAINER_NAME}" \
     server "${@:-}";
 }
 
@@ -37,7 +37,7 @@ run_server_tests()
 run_tests()
 {
   local -r USER="${1}"           # eg nobody
-  local -r CONTAINER_NAME="${2}" # eg test_shas_server
+  local -r CONTAINER_NAME="${2}" # eg test_version_reporter_server
   local -r TYPE="${3}"           # eg server
 
   echo '=================================='

@@ -3,11 +3,11 @@ version: '3.7'
 
 services:
 
-  shas:
-    image: ${CYBER_DOJO_SHAS_IMAGE}:${CYBER_DOJO_SHAS_TAG}
-    user: ${CYBER_DOJO_SHAS_SERVER_USER}
-    container_name: ${CYBER_DOJO_SHAS_SERVER_CONTAINER_NAME}
-    ports: [ "${CYBER_DOJO_SHAS_PORT}:${CYBER_DOJO_SHAS_PORT}" ]
+  version-reporter:
+    image: ${CYBER_DOJO_VERSION_REPORTER_IMAGE}:${CYBER_DOJO_VERSION_REPORTER_TAG}
+    user: ${CYBER_DOJO_VERSION_REPORTER_SERVER_USER}
+    container_name: ${CYBER_DOJO_VERSION_REPORTER_SERVER_CONTAINER_NAME}
+    ports: [ "${CYBER_DOJO_VERSION_REPORTER_PORT}:${CYBER_DOJO_VERSION_REPORTER_PORT}" ]
     build:
       context: .
       args: [ COMMIT_SHA ]
@@ -25,7 +25,7 @@ services:
   #- - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   nginx:
-    image: cyberdojo/nginx-shas-stub
+    image: cyberdojo/nginx-version-reporter-stub
     build:
       context: test/nginx_stub
     init: true
@@ -37,16 +37,16 @@ services:
     ports: [ "4444:4444" ]
 
   client:
-    image: ${CYBER_DOJO_SHAS_CLIENT_IMAGE}:${CYBER_DOJO_SHAS_TAG}
-    user: ${CYBER_DOJO_SHAS_CLIENT_USER}
-    container_name: ${CYBER_DOJO_SHAS_CLIENT_CONTAINER_NAME}
-    ports: [ "${CYBER_DOJO_SHAS_CLIENT_PORT}:${CYBER_DOJO_SHAS_CLIENT_PORT}" ]
+    image: ${CYBER_DOJO_VERSION_REPORTER_CLIENT_IMAGE}:${CYBER_DOJO_VERSION_REPORTER_TAG}
+    user: ${CYBER_DOJO_VERSION_REPORTER_CLIENT_USER}
+    container_name: ${CYBER_DOJO_VERSION_REPORTER_CLIENT_CONTAINER_NAME}
+    ports: [ "${CYBER_DOJO_VERSION_REPORTER_CLIENT_PORT}:${CYBER_DOJO_VERSION_REPORTER_CLIENT_PORT}" ]
     build:
       context: test/client
       args: [ COMMIT_SHA ]
     depends_on:
       - nginx
-      - shas
+      - version-reporter
       - selenium
     env_file: [ .env ]
     read_only: true

@@ -1,5 +1,5 @@
 
-The cyberdojo/shas service reports the commit sha used to build
+The cyberdojo/version-reporter service reports the commit sha used to build
 the image for all current cyberdojo services' container.
 It is a non-essential service and is deliberately seperated out
 into its own independently deployable service so that it can be

@@ -52,7 +52,7 @@ jobs:
       - name: Run tests, save results to evidence.json file, report to Kosli flow
         run: |
           ./sh/run_tests_with_coverage.sh          
-          kosli report evidence artifact generic cyberdojo/shas:${{ env.IMAGE_TAG }} \
+          kosli report evidence artifact generic cyberdojo/version-reporter:${{ env.IMAGE_TAG }} \
               --artifact-type=docker \
               --description="server & client branch-coverage reports" \
               --name=branch-coverage \
@@ -75,15 +75,15 @@ jobs:
       - name: Run Snyk to check Docker image for vulnerabilities
         continue-on-error: true
         run:
-           snyk container test cyberdojo/shas:${{ env.IMAGE_TAG }} 
+           snyk container test cyberdojo/version-reporter:${{ env.IMAGE_TAG }} 
             --file=Dockerfile 
             --json-file-output=snyk.json 
             --policy-path=.snyk
 
       - name: Report Snyk results to Kosli flow
         run: |
-          docker pull cyberdojo/shas:${{ env.IMAGE_TAG }}
-          kosli report evidence artifact snyk cyberdojo/shas:${{ env.IMAGE_TAG }} \
+          docker pull cyberdojo/version-reporter:${{ env.IMAGE_TAG }}
+          kosli report evidence artifact snyk cyberdojo/version-reporter:${{ env.IMAGE_TAG }} \
             --artifact-type=docker  \
             --name=snyk-scan  \
             --scan-results=snyk.json
@@ -99,6 +99,6 @@ jobs:
 
       - name: Kosli SDLC gate to short-circuit-the-flow
         run: |
-          docker pull cyberdojo/shas:${{ env.IMAGE_TAG }}          
-          kosli assert artifact cyberdojo/shas:${{ env.IMAGE_TAG }} \
+          docker pull cyberdojo/version-reporter:${{ env.IMAGE_TAG }}          
+          kosli assert artifact cyberdojo/version-reporter:${{ env.IMAGE_TAG }} \
             --artifact-type=docker

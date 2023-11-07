@@ -1,6 +1,6 @@
 variable "service_name" {
   type    = string
-  default = "shas"
+  default = "version-reporter"
 }
 
 variable "env" {
@@ -9,7 +9,7 @@ variable "env" {
 
 variable "app_port" {
   type    = number
-  default = 4522
+  default = 4528
 }
 
 variable "cpu_limit" {
@@ -36,7 +36,7 @@ variable "app_env_vars" {
   type = map(any)
   default = {
     CYBER_DOJO_PROMETHEUS = "true"
-    CYBER_DOJO_SHAS_PORT  = "4522"
+    CYBER_DOJO_VERSION_REPORTER_PORT  = "4528"
   }
 }
 
