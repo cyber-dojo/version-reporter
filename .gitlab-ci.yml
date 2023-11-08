@@ -1,3 +1,5 @@
+image: registry.gitlab.com/cyber-dojo/version-reporter:v1
+
 variables:
   KOSLI_DRY_RUN: "False"
   KOSLI_CLI_VERSION: "2.6.12"
@@ -8,7 +10,7 @@ variables:
 create-kosli-flow:
   stage: .pre
   script:
-    - ./sh/install_kosli.sh
+    # - ./sh/install_kosli.sh
     - kosli create flow $KOSLI_FLOW 
             --api-token=$KOSLI_API_TOKEN
             --description="UX for git+image version-reporter" 
