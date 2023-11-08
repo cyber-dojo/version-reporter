@@ -48,7 +48,6 @@ jobs:
           role-duration-seconds: 2400
           role-session-name: ${{ github.event.repository.name }}
           role-to-assume: arn:aws:iam::${{ needs.setup-ci-vars.outputs.aws_account_id_beta }}:role/${{ needs.setup-ci-vars.outputs.gh_actions_iam_role_name }}
-          mask-aws-account-id: false
 
       - name: Login to Amazon ECR (Elastic Container Registry)
         id: login-ecr

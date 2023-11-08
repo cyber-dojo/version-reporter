@@ -35,8 +35,8 @@ variable "TAGGED_IMAGE" {
 variable "app_env_vars" {
   type = map(any)
   default = {
-    CYBER_DOJO_PROMETHEUS = "true"
-    CYBER_DOJO_VERSION_REPORTER_PORT  = "4528"
+    CYBER_DOJO_PROMETHEUS            = "true"
+    CYBER_DOJO_VERSION_REPORTER_PORT = "4528"
   }
 }
 
