@@ -21,6 +21,8 @@ create-kosli-flow:
             --template=artifact,branch-coverage,snyk-scan
 
 build-job:
+  services:
+    - docker:dind
   stage: build
   script:
     - source ./sh/echo_versioner_env_vars.sh
