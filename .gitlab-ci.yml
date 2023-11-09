@@ -32,28 +32,34 @@ build-job:
     - docker push cyberdojo/version-reporter:$IMAGE_TAG
     - kosli report artifact cyberdojo/version-reporter:$IMAGE_TAG --artifact-type=docker
 
-# # branch-coverage-job:
-# #   stage: test
-# #   allow_failure: true
-# #   script:
-# #     - ./sh/run_tests_with_coverage.sh
-# #     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
-# #     - kosli report evidence artifact generic cyberdojo/version-reporter:$IMAGE_TAG \
-# #           --artifact-type=docker \
-# #           --description="server & client branch-coverage reports" \
-# #           --name=branch-coverage \
-# #           --user-data=./test/evidence.json
+branch-coverage-job:
+  stage: test
+  services:
+    - docker:24.0.5-dind
+  allow_failure: true
+  script:
+    - set +e
+    - ./sh/run_tests_with_coverage.sh
+    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
+    - kosli report evidence artifact generic cyberdojo/version-reporter:$IMAGE_TAG \
+          --artifact-type=docker \
+          --description="server & client branch-coverage reports" \
+          --name=branch-coverage \
+          --user-data=./test/evidence.json
 
-# # security-scan-job:
-# #   stage: test
-# #   allow_failure: true
-# #   script:
-# #     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
-# #     - snyk container test cyberdojo/version-reporter:$IMAGE_TAG \ 
-# #         --file=Dockerfile \
-# #         --json-file-output=snyk.json \ 
-# #         --policy-path=.snyk
-# #     - kosli report evidence artifact snyk cyberdojo/version-reporter:$IMAGE_TAG \
-# #       --artifact-type=docker  \
-# #       --name=security-scan  \
-# #       --scan-results=snyk.json
+security-scan-job:
+  stage: test
+  services:
+    - docker:24.0.5-dind
+  allow_failure: true
+  script:
+    - set +e
+    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
+    - snyk container test cyberdojo/version-reporter:$IMAGE_TAG \ 
+        --file=Dockerfile \
+        --json-file-output=snyk.json \ 
+        --policy-path=.snyk 
+    - kosli report evidence artifact snyk cyberdojo/version-reporter:$IMAGE_TAG \
+      --artifact-type=docker  \
+      --name=security-scan  \
+      --scan-results=snyk.json
