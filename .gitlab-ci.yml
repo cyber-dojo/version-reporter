@@ -27,10 +27,9 @@ build-job:
     - export $(echo_versioner_env_vars)
     - docker-compose build --build-arg COMMIT_SHA=$CI_COMMIT_SHA
     - IMAGE_TAG=$CI_COMMIT_SHORT_SHA
-    # DOCKER_USER, DOCKER_PASS secrets
-    # echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
-    # docker push cyberdojo/version-reporter:$IMAGE_TAG
-    # kosli report artifact cyberdojo/version-reporter:$IMAGE_TAG --artifact-type=docker
+    - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
+    - docker push cyberdojo/version-reporter:$IMAGE_TAG
+    - kosli report artifact cyberdojo/version-reporter:$IMAGE_TAG --artifact-type=docker
 
 # # branch-coverage-job:
 # #   stage: test
