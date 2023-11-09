@@ -50,15 +50,29 @@ branch-coverage-job:
 #  stage: test
 #  services:
 #    - docker:24.0.5-dind
-#  allow_failure: true
 #  script:
 #    - set +e
 #    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
+#    - docker pull cyberdojo/version-reporter:$IMAGE_TAG
 #    - snyk container test cyberdojo/version-reporter:$IMAGE_TAG
 #        --file=Dockerfile
 #        --json-file-output=snyk.json
 #        --policy-path=.snyk
 #    - kosli report evidence artifact snyk cyberdojo/version-reporter:$IMAGE_TAG
-#      --artifact-type=docker
-#      --name=security-scan
-#      --scan-results=snyk.json
+#        --artifact-type=docker
+#        --name=security-scan
+#        --scan-results=snyk.json
+
+#sdlc-gate-job:
+#  needs:
+#    - branch-coverage-job
+#    - security-scan-job
+#  stage: test
+#  services:
+#    - docker:24.0.5-dind
+#  script:
+#    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
+#    - docker pull cyberdojo/version-reporter:$IMAGE_TAG
+#    - kosli assert artifact cyberdojo/version-reporter:$IMAGE_TAG
+#        --artifact-type docker
+
