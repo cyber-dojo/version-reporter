@@ -68,6 +68,16 @@ run_tests()
 
   local -r HOST_TEST_DIR="${ROOT_DIR}/test/${TYPE}"
 
+  # On a Macbook the tar command on the "outside" of the tar-pipe
+  # uses the flags Cxf - as below. On the Gitlab CI pipeline it
+  # uses Busybox so the flags are different.
+  #  docker exec \
+  #    "${CONTAINER_NAME}" \
+  #    tar Ccf \
+  #      "$(dirname "${CONTAINER_COVERAGE_DIR}")" \
+  #      - "$(basename "${CONTAINER_COVERAGE_DIR}")" \
+  #        | tar Cxf "${HOST_TEST_DIR}/" -
+
   docker exec \
     "${CONTAINER_NAME}" \
     tar Ccf \
