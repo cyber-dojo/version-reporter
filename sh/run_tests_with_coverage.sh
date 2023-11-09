@@ -18,9 +18,7 @@ run_tests_with_coverage()
   test_in_containers "$@" || status=$?
   echo "Containers down"
   containers_down
-  echo "Writing test evidence json"
   write_test_evidence_json
-  echo "Returning status=$status"
   set -e
   return ${status}
 }
