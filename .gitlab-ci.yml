@@ -56,11 +56,11 @@ branch-coverage-job:
 #  script:
 #    - set +e
 #    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
-#    - snyk container test cyberdojo/version-reporter:$IMAGE_TAG \
-#        --file=Dockerfile \
-#        --json-file-output=snyk.json \
+#    - snyk container test cyberdojo/version-reporter:$IMAGE_TAG
+#        --file=Dockerfile
+#        --json-file-output=snyk.json
 #        --policy-path=.snyk
-#    - kosli report evidence artifact snyk cyberdojo/version-reporter:$IMAGE_TAG \
-#      --artifact-type=docker  \
-#      --name=security-scan  \
+#    - kosli report evidence artifact snyk cyberdojo/version-reporter:$IMAGE_TAG
+#      --artifact-type=docker
+#      --name=security-scan  
 #      --scan-results=snyk.json
