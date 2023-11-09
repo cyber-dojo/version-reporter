@@ -35,6 +35,7 @@ branch-coverage-job:
   stage: test
   services:
     - docker:24.0.5-dind
+  needs: ["build-job"]
   script:
     - source ./sh/run_tests_with_coverage.sh
     - if run_tests_with_coverage; then KOSLI_COMPLIANT=true; else KOSLI_COMPLIANT=false; fi
@@ -50,6 +51,7 @@ branch-coverage-job:
 #  stage: test
 #  services:
 #    - docker:24.0.5-dind
+#  needs: ["build-job"]
 #  script:
 #    - set +e
 #    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
