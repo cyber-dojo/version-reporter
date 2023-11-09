@@ -1,5 +1,8 @@
 image: registry.gitlab.com/cyber-dojo/version-reporter:v1
 
+services:
+  - docker:dind
+
 stages:
   - pre
   - build
@@ -31,8 +34,6 @@ build-job:
     # kosli report artifact cyberdojo/version-reporter:$IMAGE_TAG --artifact-type=docker
 
 branch-coverage-job:
-  services:
-    - docker:dind
   stage: test
   allow_failure: true
   script:
@@ -45,8 +46,6 @@ branch-coverage-job:
           --user-data=./test/evidence.json
 
 security-scan-job:
-  services:
-    - docker:dind
   stage: test
   allow_failure: true
   script:
