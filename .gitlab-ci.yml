@@ -42,6 +42,7 @@ branch-coverage-job:
     - set -x
     - pwd
     - ls -la
+    - ls -la ./sh
     - ./sh/run_tests_with_coverage.sh
     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
     - kosli report evidence artifact generic cyberdojo/version-reporter:$IMAGE_TAG \
