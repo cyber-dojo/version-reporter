@@ -43,7 +43,7 @@ branch-coverage-job:
     - docker image ls
     - source ./sh/run_tests_with_coverage.sh
     - set +x
-    - if [ run_tests_with_coverage == 0 ]; then KOSLI_COMPLIANT=true; else KOSLI_COMPLIANT=false; fi
+    - if [ run_tests_with_coverage ]; then KOSLI_COMPLIANT=true; else KOSLI_COMPLIANT=false; fi
     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
     - echo After
     - docker image ls
