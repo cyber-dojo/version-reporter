@@ -26,7 +26,7 @@ build-job:
     - source ./sh/echo_versioner_env_vars.sh
     - export $(echo_versioner_env_vars)
     - docker-compose build --build-arg COMMIT_SHA=$CI_COMMIT_SHA
-    - IMAGE_TAG=$CI_COMMIT_SHORT_SHA
+    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
     - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
     - docker image ls
     - docker push cyberdojo/version-reporter:$IMAGE_TAG
@@ -37,7 +37,7 @@ build-job:
 # #   allow_failure: true
 # #   script:
 # #     - ./sh/run_tests_with_coverage.sh
-# #     - IMAGE_TAG=$CI_COMMIT_SHORT_SHA
+# #     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
 # #     - kosli report evidence artifact generic cyberdojo/version-reporter:$IMAGE_TAG \
 # #           --artifact-type=docker \
 # #           --description="server & client branch-coverage reports" \
@@ -48,7 +48,7 @@ build-job:
 # #   stage: test
 # #   allow_failure: true
 # #   script:
-# #     - IMAGE_TAG=$CI_COMMIT_SHORT_SHA
+# #     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
 # #     - snyk container test cyberdojo/version-reporter:$IMAGE_TAG \ 
 # #         --file=Dockerfile \
 # #         --json-file-output=snyk.json \ 
