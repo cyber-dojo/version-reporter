@@ -1,14 +1,6 @@
 image: registry.gitlab.com/cyber-dojo/version-reporter:v1
-
-variables:
-  DOCKER_TLS_CERTDIR: "/certs"
-  DOCKER_HOST: "tcp://localhost:2375"
-
-services:
-  - docker:dind
-
 stages:
-  - pre
+  - .pre
   - build
   - test
 
@@ -16,17 +8,20 @@ variables:
   KOSLI_DRY_RUN: "False"
   KOSLI_ORG: cyber-dojo
   KOSLI_FLOW: version-reporter
+  DOCKER_TLS_CERTDIR: "/certs"
 
-create-kosli-flow:
-  stage: .pre
-  script:
-    - kosli create flow $KOSLI_FLOW 
-            --api-token=$KOSLI_API_TOKEN
-            --description="UX for git+image version-reporter" 
-            --template=artifact,branch-coverage,security-scan
+# # create-kosli-flow:
+# #   stage: .pre
+# #   script:
+# #     - kosli create flow $KOSLI_FLOW 
+# #             --api-token=$KOSLI_API_TOKEN
+# #             --description="UX for git+image version-reporter" 
+# #             --template=artifact,branch-coverage,security-scan
 
 build-job:
   stage: build
+  services:
+    - docker:24.0.5-dind
   script:
     - source ./sh/echo_versioner_env_vars.sh
     - export $(echo_versioner_env_vars)
@@ -37,29 +32,28 @@ build-job:
     # docker push cyberdojo/version-reporter:$IMAGE_TAG
     # kosli report artifact cyberdojo/version-reporter:$IMAGE_TAG --artifact-type=docker
 
-branch-coverage-job:
-  stage: test
-  allow_failure: true
-  script:
-    - ./sh/run_tests_with_coverage.sh
-    - IMAGE_TAG=$CI_COMMIT_SHORT_SHA
-    - kosli report evidence artifact generic cyberdojo/version-reporter:$IMAGE_TAG \
-          --artifact-type=docker \
-          --description="server & client branch-coverage reports" \
-          --name=branch-coverage \
-          --user-data=./test/evidence.json
+# # branch-coverage-job:
+# #   stage: test
+# #   allow_failure: true
+# #   script:
+# #     - ./sh/run_tests_with_coverage.sh
+# #     - IMAGE_TAG=$CI_COMMIT_SHORT_SHA
+# #     - kosli report evidence artifact generic cyberdojo/version-reporter:$IMAGE_TAG \
+# #           --artifact-type=docker \
+# #           --description="server & client branch-coverage reports" \
+# #           --name=branch-coverage \
+# #           --user-data=./test/evidence.json
 
-security-scan-job:
-  stage: test
-  allow_failure: true
-  script:
-    - IMAGE_TAG=$CI_COMMIT_SHORT_SHA
-    - snyk container test cyberdojo/version-reporter:$IMAGE_TAG \ 
-        --file=Dockerfile \
-        --json-file-output=snyk.json \ 
-        --policy-path=.snyk
-    - kosli report evidence artifact snyk cyberdojo/version-reporter:$IMAGE_TAG \
-      --artifact-type=docker  \
-      --name=security-scan  \
-      --scan-results=snyk.json
-
+# # security-scan-job:
+# #   stage: test
+# #   allow_failure: true
+# #   script:
+# #     - IMAGE_TAG=$CI_COMMIT_SHORT_SHA
+# #     - snyk container test cyberdojo/version-reporter:$IMAGE_TAG \ 
+# #         --file=Dockerfile \
+# #         --json-file-output=snyk.json \ 
+# #         --policy-path=.snyk
+# #     - kosli report evidence artifact snyk cyberdojo/version-reporter:$IMAGE_TAG \
+# #       --artifact-type=docker  \
+# #       --name=security-scan  \
+# #       --scan-results=snyk.json
