@@ -1,4 +1,5 @@
-FROM ubuntu:22.04
+# FROM ubuntu:22.04
+FROM cruizba/ubuntu-dind:jammy-24.0.7
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TERRAFORM_VERSION=1.6.3
