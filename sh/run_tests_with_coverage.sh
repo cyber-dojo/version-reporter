@@ -13,9 +13,13 @@ export $(echo_versioner_env_vars)
 
 run_tests_with_coverage()
 {
+  status=0
+  set +e
   server_up_healthy_and_clean
   client_up_healthy_and_clean "$@"
-  test_in_containers "$@"
+  test_in_containers "$@" || status=1
   containers_down
   write_test_evidence_json
+  set -e
+  return ${status}
 }
