@@ -28,6 +28,7 @@ build-job:
     - docker-compose build --build-arg COMMIT_SHA=$CI_COMMIT_SHA
     - IMAGE_TAG=$CI_COMMIT_SHORT_SHA
     - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
+    - docker image ls
     - docker push cyberdojo/version-reporter:$IMAGE_TAG
     - kosli report artifact cyberdojo/version-reporter:$IMAGE_TAG --artifact-type=docker
 
