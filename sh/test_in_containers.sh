@@ -80,7 +80,7 @@ run_tests()
         - "$(basename "${CONTAINER_COVERAGE_DIR}")" \
           | tar -x -f - -C "${HOST_TEST_DIR}/"
   else
-    # On a Macbook the outer-tar command needs different.
+    # On a Macbook the outer-tar command needs different flags.
     docker exec \
       "${CONTAINER_NAME}" \
       tar Ccf \
