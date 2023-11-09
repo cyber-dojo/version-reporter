@@ -25,7 +25,6 @@ build-job:
   script:
     - source ./sh/echo_versioner_env_vars.sh
     - export $(echo_versioner_env_vars)
-    - docker pull cyberdojo/version-reporter:latest
     - docker-compose build --build-arg COMMIT_SHA=$CI_COMMIT_SHA
     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
     - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
@@ -36,17 +35,10 @@ branch-coverage-job:
   stage: test
   services:
     - docker:24.0.5-dind
-  allow_failure: true
   script:
-    - set +e
-    - echo Before
-    - docker image ls
     - source ./sh/run_tests_with_coverage.sh
-    - set +x
     - if run_tests_with_coverage; then KOSLI_COMPLIANT=true; else KOSLI_COMPLIANT=false; fi
     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
-    - echo After
-    - docker image ls
     - kosli report evidence artifact generic cyberdojo/version-reporter:$IMAGE_TAG
           --artifact-type=docker
           --compliant=$KOSLI_COMPLIANT

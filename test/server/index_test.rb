@@ -9,15 +9,15 @@ class IndexTest < TestBase
 
   # - - - - - - - - - - - - - - - - -
 
-#   test 'q5e',
-#   %w( index page has entry for each service ) do
-#     get '/index'
-#     assert status?(200), status
-#     html = last_response.body
-#     SERVICE_NAMES.sort.each do |name|
-#       assert html =~ id_for(name), name+':'+html
-#     end
-#   end
+  test 'q5e',
+  %w( index page has entry for each service ) do
+    get '/index'
+    assert status?(200), status
+    html = last_response.body
+    SERVICE_NAMES.sort.each do |name|
+      assert html =~ id_for(name), name+':'+html
+    end
+  end
 
   private
 

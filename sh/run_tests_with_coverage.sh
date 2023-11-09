@@ -16,7 +16,6 @@ run_tests_with_coverage()
   server_up_healthy_and_clean
   client_up_healthy_and_clean "$@"
   test_in_containers "$@" || status=$?
-  echo "Containers down"
   containers_down
   write_test_evidence_json
   set -e
