@@ -5,7 +5,7 @@ ARG KOSLI_CLI_VERSION=2.6.12
 
 # install dependencies
 RUN apk update \
- && apk add curl unzip sudo git
+ && apk add curl unzip sudo git bash
 
 # Install Kosli
 RUN curl -L https://github.com/kosli-dev/cli/releases/download/v${KOSLI_CLI_VERSION}/kosli_${KOSLI_CLI_VERSION}_linux_amd64.tar.gz | tar zx \
