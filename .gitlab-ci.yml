@@ -1,5 +1,9 @@
 image: registry.gitlab.com/cyber-dojo/version-reporter:v1
 
+variables:
+  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_HOST: "tcp://localhost:2375"
+
 services:
   - docker:dind
 
