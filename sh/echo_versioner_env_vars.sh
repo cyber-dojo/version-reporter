@@ -6,10 +6,8 @@ echo_versioner_env_vars()
 {
   docker run --rm cyberdojo/versioner:latest
   #
-  echo CYBER_DOJO_VERSION_REPORTER_IMAGE=cyberdojo/version-reporter
   echo CYBER_DOJO_VERSION_REPORTER_SHA="$(git_commit_sha)"
   echo CYBER_DOJO_VERSION_REPORTER_TAG="$(git_commit_tag)"
-  echo CYBER_DOJO_VERSION_REPORTER_PORT=4528
   #
   echo CYBER_DOJO_VERSION_REPORTER_CLIENT_IMAGE=cyberdojo/version-reporter-client
   echo CYBER_DOJO_VERSION_REPORTER_CLIENT_PORT=9999
@@ -24,7 +22,7 @@ echo_versioner_env_vars()
 # - - - - - - - - - - - - - - - - - - - - - - - -
 git_commit_sha()
 {
-  echo "$(cd "$(repo_root)" && git rev-parse HEAD)"
+  git rev-parse HEAD
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - -
