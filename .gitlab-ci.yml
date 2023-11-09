@@ -7,8 +7,6 @@ stages:
 
 variables:
   KOSLI_DRY_RUN: "False"
-  KOSLI_CLI_VERSION: "2.6.12"
-  KOSLI_HOST: "https://app.kosli.com"
   KOSLI_ORG: cyber-dojo
   KOSLI_FLOW: version-reporter
 
