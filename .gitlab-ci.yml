@@ -18,19 +18,19 @@ variables:
 # #             --description="UX for git+image version-reporter" 
 # #             --template=artifact,branch-coverage,security-scan
 
-build-job:
-  stage: build
-  services:
-    - docker:24.0.5-dind
-  script:
-    - source ./sh/echo_versioner_env_vars.sh
-    - export $(echo_versioner_env_vars)
-    - docker-compose build --build-arg COMMIT_SHA=$CI_COMMIT_SHA
-    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
-    - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
-    - docker image ls
-    - docker push cyberdojo/version-reporter:$IMAGE_TAG
-    - kosli report artifact cyberdojo/version-reporter:$IMAGE_TAG --artifact-type=docker
+# build-job:
+#   stage: build
+#   services:
+#     - docker:24.0.5-dind
+#   script:
+#     - source ./sh/echo_versioner_env_vars.sh
+#     - export $(echo_versioner_env_vars)
+#     - docker-compose build --build-arg COMMIT_SHA=$CI_COMMIT_SHA
+#     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
+#     - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
+#     - docker image ls
+#     - docker push cyberdojo/version-reporter:$IMAGE_TAG
+#     - kosli report artifact cyberdojo/version-reporter:$IMAGE_TAG --artifact-type=docker
 
 branch-coverage-job:
   stage: test
@@ -39,6 +39,9 @@ branch-coverage-job:
   allow_failure: true
   script:
     - set +e
+    - set -x
+    - pwd
+    - ls -la
     - ./sh/run_tests_with_coverage.sh
     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
     - kosli report evidence artifact generic cyberdojo/version-reporter:$IMAGE_TAG \
