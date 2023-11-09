@@ -41,9 +41,11 @@ branch-coverage-job:
     - set +e
     - source ./sh/run_tests_with_coverage.sh
     - run_tests_with_coverage
+    - if [ $? == 0 ]; then KOSLI_COMPLIANT='true'; else KOSLI_COMPLIANT='false'; fi
     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
     - kosli report evidence artifact generic cyberdojo/version-reporter:$IMAGE_TAG
           --artifact-type=docker
+          --compliant=$KOSLI_COMPLIANT
           --description="server & client branch-coverage reports"
           --name=branch-coverage
           --user-data=./test/evidence.json
