@@ -39,10 +39,14 @@ branch-coverage-job:
   allow_failure: true
   script:
     - set +e
+    - echo Before
+    - docker image ls
     - source ./sh/run_tests_with_coverage.sh
     - set +x
     - if [ run_tests_with_coverage == 0 ]; then KOSLI_COMPLIANT=true; else KOSLI_COMPLIANT=false; fi
     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
+    - echo After
+    - docker image ls
     - kosli report evidence artifact generic cyberdojo/version-reporter:$IMAGE_TAG
           --artifact-type=docker
           --compliant=$KOSLI_COMPLIANT
