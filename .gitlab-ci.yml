@@ -26,6 +26,7 @@ build-job:
     - source ./sh/echo_versioner_env_vars.sh
     - export $(echo_versioner_env_vars)
     - docker-compose build --build-arg COMMIT_SHA=$CI_COMMIT_SHA
+    - ls -al /var/lib/docker
     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
     - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
     - docker push cyberdojo/version-reporter:$IMAGE_TAG
