@@ -28,7 +28,6 @@ build-job:
     - docker-compose build --build-arg COMMIT_SHA=$CI_COMMIT_SHA
     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
     - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
-    - docker image ls
     - docker push cyberdojo/version-reporter:$IMAGE_TAG
     - kosli report artifact cyberdojo/version-reporter:$IMAGE_TAG --artifact-type=docker
 
@@ -62,5 +61,5 @@ branch-coverage-job:
 #        --policy-path=.snyk
 #    - kosli report evidence artifact snyk cyberdojo/version-reporter:$IMAGE_TAG
 #      --artifact-type=docker
-#      --name=security-scan  
+#      --name=security-scan
 #      --scan-results=snyk.json
