@@ -28,7 +28,7 @@ git_commit_sha()
 # - - - - - - - - - - - - - - - - - - - - - - - -
 git_commit_tag()
 {
-  local -r sha="$(git_commit_sha)"
+  sha="$(git_commit_sha)"
   echo "${sha:0:7}"
 }
 
