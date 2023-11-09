@@ -73,7 +73,7 @@ run_tests()
     tar Ccf \
       "$(dirname "${CONTAINER_COVERAGE_DIR}")" \
       - "$(basename "${CONTAINER_COVERAGE_DIR}")" \
-        | tar x -C "${HOST_TEST_DIR}/" -
+        | tar -x -f - -C "${HOST_TEST_DIR}/" 
 
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Process test-run results and coverage data.
