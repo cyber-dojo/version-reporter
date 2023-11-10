@@ -7,7 +7,7 @@ ARG TFSH_VERSION=0.2.1
 
 # install dependencies
 RUN apk update \
- && apk add curl unzip sudo git bash libstdc++ aws-cli
+ && apk add curl unzip sudo git bash libstdc++ libc6-compat aws-cli
 
 # Install Kosli
 RUN curl -L https://github.com/kosli-dev/cli/releases/download/v${KOSLI_CLI_VERSION}/kosli_${KOSLI_CLI_VERSION}_linux_amd64.tar.gz | tar zx \
@@ -18,15 +18,10 @@ RUN curl "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terrafor
 
 # Install Snyk
 ENV GLIBC_REPO=https://github.com/sgerrand/alpine-pkg-glibc
-ENV GLIBC_VERSION=2.30-r0
-
-RUN set -ex && \
-    apk --update add libstdc++ curl ca-certificates && \
-    for pkg in glibc-${GLIBC_VERSION} glibc-bin-${GLIBC_VERSION}; \
-        do curl -sSL ${GLIBC_REPO}/releases/download/${GLIBC_VERSION}/${pkg}.apk -o /tmp/${pkg}.apk; done && \
-    apk add --allow-untrusted /tmp/*.apk && \
-    rm -v /tmp/*.apk && \
-    sudo /usr/glibc-compat/sbin/ldconfig /lib /usr/glibc-compat/lib
+ENV GLIBC_VERSION=2.35-r1
+RUN curl -L ${GLIBC_REPO}/releases/download/${GLIBC_VERSION}/glibc-${GLIBC_VERSION}.apk -o glibc-${GLIBC_VERSION}.apk \
+      && apk --no-cache add --allow-untrusted --force-overwrite glibc-${GLIBC_VERSION}.apk \
+      && apk add --force-overwrite alpine-baselayout-data
 
 RUN curl -L https://github.com/snyk/cli/releases/download/v${SNYK_VERSION}/snyk-alpine -o snyk \
       && chmod +x ./snyk \
