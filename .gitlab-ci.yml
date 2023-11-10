@@ -33,7 +33,6 @@ build-job:
     - FINGERPRINT=$(kosli fingerprint cyberdojo/version-reporter:$IMAGE_TAG --artifact-type=docker)
     - mkdir output
     - echo $FINGERPRINT > output/fingerprint
-    - cat output/fingerprint
   artifacts:
     paths: [ output/ ]
 
@@ -76,7 +75,7 @@ security-scan-job:
 #  stage: test
 #  services:
 #    - docker:24.0.5-dind
-#  needs: [ "build-job" ]
+#  needs: ["build-job"]
 #  script:
 #    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
 #    - kosli report evidence artifact pullrequest gitlab cyberdojo/version-reporter:$IMAGE_TAG
@@ -110,7 +109,18 @@ security-scan-job:
 #        --environment aws-beta
 #    - DEPLOY_TO_AWS_BETA
 
-# then manual approval step
+# then manual approval job
 
-# then prod-deployment-job
+#prod-deployment-job:
+#  needs: ["manual-approval-job"]
+#  stage: deployment
+#  services:
+#    - docker:24.0.5-dind
+#  script:
+#    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
+#    - kosli expect deployment cyberdojo/version-reporter:$IMAGE_TAG
+#        --fingerprint=$(cat output/fingerprint)
+#        --description "Deployed to aws-prod in Gitlab pipeline"
+#        --environment aws-prod
+#    - DEPLOY_TO_AWS_PROD
 
