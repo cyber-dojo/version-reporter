@@ -16,14 +16,13 @@ create-kosli-flow:
   script:
     - kosli create flow $KOSLI_FLOW
         --description="UX for git+image version-reporter"
-        --template=artifact,branch-coverage
+        --template=artifact,branch-coverage,security-scan
 #        --template=artifact,branch-coverage,security-scan,pull-request,manual-approval
 
 build-job:
   stage: build
-  needs: ["create-kosli-flow"]
-  services:
-    - docker:24.0.5-dind
+  needs: [ "create-kosli-flow" ]
+  services: [ "docker:24.0.5-dind" ]
   artifacts:
     paths: [ output/ ]
   script:
@@ -40,9 +39,8 @@ build-job:
 
 branch-coverage-job:
   stage: test
-  needs: ["build-job"]
-  services:
-    - docker:24.0.5-dind
+  needs: [ "build-job" ]
+  services: [ "docker:24.0.5-dind" ]
   artifacts:
     paths: [ output/ ]
   script:
@@ -56,14 +54,14 @@ branch-coverage-job:
           --name=branch-coverage
           --user-data=./test/evidence.json
 
-#security-scan-job:
-#  stage: test
-#  needs: ["build-job"]
-#  artifacts:
-#    paths: [ output/ ]
-#  script:
-#    - set +e
-#    - ls -la /bin/
+security-scan-job:
+  stage: test
+  needs: [ "build-job" ]
+  artifacts:
+    paths: [ output/ ]
+  script:
+    - set +e
+    - ls -la /bin/
 #    - snyk --version
 #    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
 #    - snyk container test cyberdojo/version-reporter:$IMAGE_TAG
@@ -77,7 +75,7 @@ branch-coverage-job:
 
 #pull-request-job:
 #  stage: test
-#  needs: ["build-job"]
+#  needs: [ "build-job" ]
 #  artifacts:
 #    paths: [ output/ ]
 #  script:
@@ -91,7 +89,7 @@ sdlc-gate-job:
   stage: test
   needs:
     - branch-coverage-job
-#    - security-scan-job
+    - security-scan-job
 #    - pull-request-job
   artifacts:
     paths: [ output/ ]
@@ -101,7 +99,7 @@ sdlc-gate-job:
         --fingerprint=$(cat output/fingerprint)
 
 beta-deployment-job:
-  needs: ["sdlc-gate-job"]
+  needs: [ "sdlc-gate-job" ]
   stage: deployment
   script:
     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
@@ -112,7 +110,7 @@ beta-deployment-job:
 #    - DEPLOY_TO_AWS_BETA
 
 #prod-deployment-job:
-#  needs: ["prod-deployment-job"]
+#  needs: [ "prod-deployment-job" ]
 #  stage: deployment
 #  script:
 #    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
