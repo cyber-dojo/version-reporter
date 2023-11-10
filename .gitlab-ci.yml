@@ -108,12 +108,12 @@ beta-deployment-job:
     AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_BETA}
   script:
     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
-#    - kosli expect deployment cyberdojo/version-reporter:$IMAGE_TAG
-#        --fingerprint=$(cat output/fingerprint)
-#        --description "Deployed to aws-beta in Gitlab pipeline"
-#        --environment aws-beta
+    - kosli expect deployment cyberdojo/version-reporter:$IMAGE_TAG
+        --fingerprint=$(cat output/fingerprint)
+        --description "Deployed to aws-beta in Gitlab pipeline"
+        --environment aws-beta
     - export TF_VAR_TAGGED_IMAGE=cyberdojo/version-reporter:$IMAGE_TAG
-    - cd deployment/terraform && tf.sh plan
+    - cd deployment/terraform && tf.sh apply
 
 #prod-deployment-job:
 #  needs: [ "prod-deployment-job" ]
