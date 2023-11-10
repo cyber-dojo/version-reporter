@@ -7,7 +7,7 @@ ARG TFSH_VERSION=0.2.1
 
 # install dependencies
 RUN apk update \
- && apk add curl unzip sudo git bash libstdc++ aws-cli
+ && apk add curl unzip sudo git bash libstdc++ libc6-compat aws-cli
 
 # Install Kosli
 RUN curl -L https://github.com/kosli-dev/cli/releases/download/v${KOSLI_CLI_VERSION}/kosli_${KOSLI_CLI_VERSION}_linux_amd64.tar.gz | tar zx \
