@@ -16,7 +16,7 @@ create-kosli-flow:
   script:
     - kosli create flow $KOSLI_FLOW
         --description="UX for git+image version-reporter"
-        --template=artifact,branch-coverage,security-scan
+        --template=artifact,branch-coverage,security-scan,pull-request
 #        --template=artifact,branch-coverage,security-scan,pull-request,manual-approval
 
 build-job:
@@ -72,23 +72,23 @@ security-scan-job:
 # #        --name=security-scan
 # #        --scan-results=snyk.json
 
-#pull-request-job:
-#  stage: test
-#  needs: [ "build-job" ]
-#  artifacts:
-#    paths: [ output/ ]
-#  script:
-#    - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
-#        --fingerprint=$(cat output/fingerprint)
-#        --name=pull-request
-#        --gitlab-token=?????
+pull-request-job:
+ stage: test
+ needs: [ "build-job" ]
+ artifacts:
+   paths: [ output/ ]
+ script:
+   - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
+       --fingerprint=$(cat output/fingerprint)
+       --name=pull-request
+       --gitlab-token=$KOSLI_GITLAB_TOKEN
 
 sdlc-gate-job:
   stage: test
   needs:
     - branch-coverage-job
     - security-scan-job
-#    - pull-request-job
+    - pull-request-job
   artifacts:
     paths: [ output/ ]
   script:
