@@ -30,6 +30,12 @@ build-job:
     - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
     - docker push cyberdojo/version-reporter:$IMAGE_TAG
     - kosli report artifact cyberdojo/version-reporter:$IMAGE_TAG --artifact-type=docker
+    - FINGERPRINT=$(kosli fingerprint cyberdojo/version-reporter:$IMAGE_TAG --artifact-type=docker)
+    - mkdir outputs
+    - echo $FINGERPRINT > outputs/fingerprint
+    - cat outputs/fingerprint
+  artifacts:
+    paths: [ output/ ]
 
 branch-coverage-job:
   stage: test
@@ -56,6 +62,8 @@ security-scan-job:
    - set +e
    - ls -la /bin/
    - snyk --version
+   - cat outputs/fingerprint
+
 #    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
 #    - docker pull cyberdojo/version-reporter:$IMAGE_TAG
 #    - snyk container test cyberdojo/version-reporter:$IMAGE_TAG
@@ -111,3 +119,7 @@ security-scan-job:
 # then manual approval step
 
 # then prod-deployment-job
+
+# TODO: in build-job make artifact fingerprint available to subsequent jobs
+#       don't do [docker pull] commands
+#       replace --artifact-type flag with --fingerprint flag
