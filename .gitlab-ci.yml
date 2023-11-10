@@ -47,7 +47,7 @@ branch-coverage-job:
     - if run_tests_with_coverage; then KOSLI_COMPLIANT=true; else KOSLI_COMPLIANT=false; fi
     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
     - kosli report evidence artifact generic cyberdojo/version-reporter:$IMAGE_TAG
-          --artifact-type=docker
+          --fingerprint=$(cat output/fingerprint)
           --compliant=$KOSLI_COMPLIANT
           --description="server & client branch-coverage reports"
           --name=branch-coverage
@@ -62,16 +62,13 @@ security-scan-job:
    - set +e
    - ls -la /bin/
    - snyk --version
-   - cat output/fingerprint
-
 #    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
-#    - docker pull cyberdojo/version-reporter:$IMAGE_TAG
 #    - snyk container test cyberdojo/version-reporter:$IMAGE_TAG
 #        --file=Dockerfile
 #        --json-file-output=snyk.json
 #        --policy-path=.snyk
 #    - kosli report evidence artifact snyk cyberdojo/version-reporter:$IMAGE_TAG
-#        --artifact-type=docker
+#        --fingerprint=$(cat output/fingerprint)
 #        --name=security-scan
 #        --scan-results=snyk.json
 
@@ -82,9 +79,8 @@ security-scan-job:
 #  needs: [ "build-job" ]
 #  script:
 #    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
-#    - docker pull cyberdojo/version-reporter:$IMAGE_TAG
 #    - kosli report evidence artifact pullrequest gitlab cyberdojo/version-reporter:$IMAGE_TAG
-#        --artifact-type=docker
+#        --fingerprint=$(cat output/fingerprint)
 #        --name=pull-request
 #        --gitlab-token=?????
 
@@ -98,9 +94,8 @@ security-scan-job:
 #    - docker:24.0.5-dind
 #  script:
 #    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
-#    - docker pull cyberdojo/version-reporter:$IMAGE_TAG
 #    - kosli assert artifact cyberdojo/version-reporter:$IMAGE_TAG
-#        --artifact-type docker
+#        --fingerprint=$(cat output/fingerprint)
 
 #beta-deployment-job:
 #  needs: ["sdlc-gate-job"]
@@ -109,9 +104,8 @@ security-scan-job:
 #    - docker:24.0.5-dind
 #  script:
 #    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
-#    - docker pull cyberdojo/version-reporter:$IMAGE_TAG
 #    - kosli expect deployment cyberdojo/version-reporter:$IMAGE_TAG
-#        --artifact-type docker
+#        --fingerprint=$(cat output/fingerprint)
 #        --description "Deployed to aws-beta in Gitlab pipeline"
 #        --environment aws-beta
 #    - DEPLOY_TO_AWS_BETA
@@ -120,6 +114,3 @@ security-scan-job:
 
 # then prod-deployment-job
 
-# TODO: in build-job make artifact fingerprint available to subsequent jobs
-#       don't do [docker pull] commands
-#       replace --artifact-type flag with --fingerprint flag
