@@ -11,3 +11,5 @@ docker build -t registry.gitlab.com/cyber-dojo/version-reporter:v1 -f Dockerfile
 
 To push it to the gitlab registry
 docker push registry.gitlab.com/cyber-dojo/version-reporter:v1
+
+More notes..
