@@ -22,7 +22,7 @@ variables:
 
 build-job:
   stage: build
-  needs: [ "create-kosli-flow" ]
+  # needs: [ "create-kosli-flow" ]
   services: [ "cruizba/ubuntu-dind:jammy-24.0.7" ]
   artifacts:
     paths: [ output/ ]
