@@ -11,19 +11,21 @@ variables:
   KOSLI_FLOW: version-reporter
   DOCKER_TLS_CERTDIR: "/certs"
 
-create-kosli-flow:
-  stage: .pre
-  script:
-    - kosli create flow $KOSLI_FLOW
-        --api-token=$KOSLI_API_TOKEN
-        --description="UX for git+image version-reporter"
-        --template=artifact,branch-coverage
+#create-kosli-flow:
+#  stage: .pre
+#  script:
+#    - kosli create flow $KOSLI_FLOW
+#        --api-token=$KOSLI_API_TOKEN
+#        --description="UX for git+image version-reporter"
+#        --template=artifact,branch-coverage
 #        --template=artifact,branch-coverage,security-scan,pull-request,manual-approval
 
 build-job:
   stage: build
   services:
     - docker:24.0.5-dind
+  artifacts:
+    paths: [ output/ ]
   script:
     - source ./sh/echo_versioner_env_vars.sh
     - export $(echo_versioner_env_vars)
@@ -35,14 +37,14 @@ build-job:
     - FINGERPRINT=$(kosli fingerprint cyberdojo/version-reporter:$IMAGE_TAG --artifact-type=docker)
     - mkdir output
     - echo $FINGERPRINT > output/fingerprint
-  artifacts:
-    paths: [ output/ ]
 
 branch-coverage-job:
   stage: test
+  needs: ["build-job"]
   services:
     - docker:24.0.5-dind
-  needs: ["build-job"]
+  artifacts:
+    paths: [ output/ ]
   script:
     - source ./sh/run_tests_with_coverage.sh
     - if run_tests_with_coverage; then KOSLI_COMPLIANT=true; else KOSLI_COMPLIANT=false; fi
@@ -56,9 +58,11 @@ branch-coverage-job:
 
 #security-scan-job:
 # stage: test
+# needs: ["build-job"]
 # services:
 #   - docker:24.0.5-dind
-# needs: ["build-job"]
+#  artifacts:
+#    paths: [ output/ ]
 # script:
 #   - set +e
 #   - ls -la /bin/
@@ -75,9 +79,11 @@ branch-coverage-job:
 
 #pull-request-job:
 #  stage: test
+#  needs: ["build-job"]
 #  services:
 #    - docker:24.0.5-dind
-#  needs: ["build-job"]
+#  artifacts:
+#    paths: [ output/ ]
 #  script:
 #    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
 #    - kosli report evidence artifact pullrequest gitlab cyberdojo/version-reporter:$IMAGE_TAG
@@ -86,29 +92,31 @@ branch-coverage-job:
 #        --gitlab-token=?????
 
 sdlc-gate-job:
+  stage: test
   needs:
     - branch-coverage-job
 #    - security-scan-job
 #    - pull-request-job
-  stage: test
   services:
     - docker:24.0.5-dind
+  artifacts:
+    paths: [ output/ ]
   script:
     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
     - kosli assert artifact cyberdojo/version-reporter:$IMAGE_TAG
         --fingerprint=$(cat output/fingerprint)
 
-beta-deployment-job:
-  needs: ["sdlc-gate-job"]
-  stage: deployment
-  services:
-    - docker:24.0.5-dind
-  script:
-    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
-    - kosli expect deployment cyberdojo/version-reporter:$IMAGE_TAG
-        --fingerprint=$(cat output/fingerprint)
-        --description "Deployed to aws-beta in Gitlab pipeline"
-        --environment aws-beta
+#beta-deployment-job:
+#  needs: ["sdlc-gate-job"]
+#  stage: deployment
+#  services:
+#    - docker:24.0.5-dind
+#  script:
+#    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
+#    - kosli expect deployment cyberdojo/version-reporter:$IMAGE_TAG
+#        --fingerprint=$(cat output/fingerprint)
+#        --description "Deployed to aws-beta in Gitlab pipeline"
+#        --environment aws-beta
 #    - DEPLOY_TO_AWS_BETA
 
 # then manual approval job, with attestation
