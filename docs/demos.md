@@ -32,6 +32,7 @@ to
 and then commit and push.
 
 # Fail deployment when a pull request is not found for the change
+Do a commit that is not in a pull-request!
 WIP
 
 # Alert when a manual deployment is made
