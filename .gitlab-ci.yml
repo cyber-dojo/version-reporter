@@ -16,7 +16,7 @@ variables:
 #    - kosli create flow $KOSLI_FLOW
 #        --api-token=$KOSLI_API_TOKEN
 #        --description="UX for git+image version-reporter"
-#        --template=artifact,branch-coverage,security-scan,pull-request
+#        --template=artifact,branch-coverage,security-scan,pull-request,manual-approval
 
 build-job:
   stage: build
@@ -109,7 +109,7 @@ security-scan-job:
 #        --environment aws-beta
 #    - DEPLOY_TO_AWS_BETA
 
-# then manual approval job
+# then manual approval job, with attestation
 
 #prod-deployment-job:
 #  needs: ["manual-approval-job"]
