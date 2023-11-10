@@ -56,13 +56,13 @@ branch-coverage-job:
           --user-data=./test/evidence.json
 
 security-scan-job:
+  image: registry.gitlab.com/cyber-dojo/version-reporter:v1-ubuntu
   stage: test
   needs: [ "build-job" ]
   artifacts:
     paths: [ output/ ]
   script:
     - set +e
-    - ls -la /bin/
     - snyk --version
  #    - snyk container test $(cat output/tagged_image)
  #        --file=Dockerfile
