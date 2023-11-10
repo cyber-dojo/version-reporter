@@ -1,13 +1,14 @@
-FROM docker:24.0.5
+FROM cruizba/ubuntu-dind:jammy-24.0.7
 
+ARG DEBIAN_FRONTEND=noninteractive
 ARG TERRAFORM_VERSION=1.6.3
 ARG KOSLI_CLI_VERSION=2.6.12
 ARG SNYK_VERSION=1.1243.0
 ARG TFSH_VERSION=0.2.1
 
 # install dependencies
-RUN apk update \
- && apk add curl unzip sudo git bash libstdc++ aws-cli
+RUN apt-get update \
+      && apt-get install curl unzip sudo git bash awscli -y
 
 # Install Kosli
 RUN curl -L https://github.com/kosli-dev/cli/releases/download/v${KOSLI_CLI_VERSION}/kosli_${KOSLI_CLI_VERSION}_linux_amd64.tar.gz | tar zx \
@@ -17,18 +18,7 @@ RUN curl -L https://github.com/kosli-dev/cli/releases/download/v${KOSLI_CLI_VERS
 RUN curl "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" -o terraform_${TERRAFORM_VERSION}_linux_amd64.zip && unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip && mv terraform ./bin/
 
 # Install Snyk
-ENV GLIBC_REPO=https://github.com/sgerrand/alpine-pkg-glibc
-ENV GLIBC_VERSION=2.30-r0
-
-RUN set -ex && \
-    apk --update add libstdc++ curl ca-certificates && \
-    for pkg in glibc-${GLIBC_VERSION} glibc-bin-${GLIBC_VERSION}; \
-        do curl -sSL ${GLIBC_REPO}/releases/download/${GLIBC_VERSION}/${pkg}.apk -o /tmp/${pkg}.apk; done && \
-    apk add --allow-untrusted /tmp/*.apk && \
-    rm -v /tmp/*.apk && \
-    sudo /usr/glibc-compat/sbin/ldconfig /lib /usr/glibc-compat/lib
-
-RUN curl -L https://github.com/snyk/cli/releases/download/v${SNYK_VERSION}/snyk-alpine -o snyk \
+RUN curl -L https://github.com/snyk/cli/releases/download/v${SNYK_VERSION}/snyk-linux -o snyk \
       && chmod +x ./snyk \
       && sudo mv ./snyk /bin/snyk
 
