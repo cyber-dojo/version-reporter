@@ -59,8 +59,6 @@ branch-coverage-job:
 #security-scan-job:
 #  stage: test
 #  needs: ["build-job"]
-#  services:
-#    - docker:24.0.5-dind
 #  artifacts:
 #    paths: [ output/ ]
 #  script:
@@ -80,8 +78,6 @@ branch-coverage-job:
 #pull-request-job:
 #  stage: test
 #  needs: ["build-job"]
-#  services:
-#    - docker:24.0.5-dind
 #  artifacts:
 #    paths: [ output/ ]
 #  script:
@@ -97,8 +93,6 @@ sdlc-gate-job:
     - branch-coverage-job
 #    - security-scan-job
 #    - pull-request-job
-#  services:
-#    - docker:24.0.5-dind
   artifacts:
     paths: [ output/ ]
   script:
@@ -109,8 +103,6 @@ sdlc-gate-job:
 beta-deployment-job:
   needs: ["sdlc-gate-job"]
   stage: deployment
-#  services:
-#    - docker:24.0.5-dind
   script:
     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
 #    - kosli expect deployment cyberdojo/version-reporter:$IMAGE_TAG
@@ -119,13 +111,9 @@ beta-deployment-job:
 #        --environment aws-beta
 #    - DEPLOY_TO_AWS_BETA
 
-# then manual approval job, with attestation
-
 #prod-deployment-job:
 #  needs: ["manual-approval-job"]
 #  stage: deployment
-#  services:
-#    - docker:24.0.5-dind
 #  script:
 #    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
 #    - kosli expect deployment cyberdojo/version-reporter:$IMAGE_TAG
