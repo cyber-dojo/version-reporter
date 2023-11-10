@@ -1,4 +1,8 @@
 
+To show what version-reporter gives you...
+https://beta.cyber-dojo.org/version-reporter/index
+
+
 # Fail deployment when a commit lowers code coverage
 
 Go into the `test/server` directory and rename the
