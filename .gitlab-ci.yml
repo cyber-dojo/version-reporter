@@ -112,20 +112,17 @@ beta-deployment-job:
     - export TF_VAR_TAGGED_IMAGE=$(cat output/tagged_image)
     - cd deployment/terraform && tf.sh apply
 
-# #prod-deployment-job:
-# #  needs: [ "beta-deployment-job" ]
-# #  stage: deployment
-# #  artifacts:
-# #    paths: [ output/ ]
-# #  variables:
-# #    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_PROD}
-# #    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_PROD}
-# #  script:
-# #    - kosli expect deployment $(cat output/tagged_image)
-# #        --fingerprint=$(cat output/fingerprint)
-# #        --description "Deployed to aws-prod in Gitlab pipeline"
-# #        --environment aws-prod
-# #    - DEPLOY_TO_AWS_PROD
-
-# # TODO: versioner needs a deployed image to be
-# #       pushed to dockerhub with the :latest tag
+ #prod-deployment-job:
+ #  needs: [ "beta-deployment-job" ]
+ #  stage: deployment
+ #  artifacts:
+ #    paths: [ output/ ]
+ #  variables:
+ #    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_PROD}
+ #    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_PROD}
+ #  script:
+ #    - kosli expect deployment $(cat output/tagged_image)
+ #        --fingerprint=$(cat output/fingerprint)
+ #        --description "Deployed to aws-prod in Gitlab pipeline"
+ #        --environment aws-prod
+ #    - DEPLOY_TO_AWS_PROD

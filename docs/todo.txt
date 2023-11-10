@@ -1,0 +1,5 @@
+cyberdojo/versioner needs cyberdojo/version-reporter:latest
+to be what is running in aws-prod.
+So add
+docker tag cyberdojo/version-reporter:$TAG cyberdojo/version-reporter:latest
+docker push cyberdojo/version-reporter:latest
