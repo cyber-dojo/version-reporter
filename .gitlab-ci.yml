@@ -3,6 +3,7 @@ stages:
   - .pre
   - build
   - test
+  - sdlc
   - deployment
 
 variables:
@@ -63,14 +64,14 @@ security-scan-job:
     - set +e
     - ls -la /bin/
     - snyk --version
-# #    - snyk container test $(cat output/tagged_image)
-# #        --file=Dockerfile
-# #        --json-file-output=snyk.json
-# #        --policy-path=.snyk
-# #    - kosli report evidence artifact snyk $(cat output/tagged_image)
-# #        --fingerprint=$(cat output/fingerprint)
-# #        --name=security-scan
-# #        --scan-results=snyk.json
+ #    - snyk container test $(cat output/tagged_image)
+ #        --file=Dockerfile
+ #        --json-file-output=snyk.json
+ #        --policy-path=.snyk
+ #    - kosli report evidence artifact snyk $(cat output/tagged_image)
+ #        --fingerprint=$(cat output/fingerprint)
+ #        --name=security-scan
+ #        --scan-results=snyk.json
 
 pull-request-job:
  stage: test
@@ -84,7 +85,7 @@ pull-request-job:
        --gitlab-token=$KOSLI_GITLAB_TOKEN
 
 sdlc-gate-job:
-  stage: test
+  stage: sdlc
   needs:
     - branch-coverage-job
     - security-scan-job
@@ -123,3 +124,5 @@ beta-deployment-job:
 #        --environment aws-prod
 #    - DEPLOY_TO_AWS_PROD
 
+# TODO: versioner needs a deployed image to be
+#       pushed to dockerhub with the :latest tag
