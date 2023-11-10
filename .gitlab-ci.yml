@@ -11,50 +11,50 @@ variables:
   KOSLI_FLOW: version-reporter
   DOCKER_TLS_CERTDIR: "/certs"
 
-# create-kosli-flow:
-#   stage: .pre
-#   script:
-#     - kosli create flow $KOSLI_FLOW
-#         --description="UX for git+image version-reporter"
-#         --template=artifact,branch-coverage
-# #        --template=artifact,branch-coverage,security-scan,pull-request,manual-approval
+create-kosli-flow:
+  stage: .pre
+  script:
+    - kosli create flow $KOSLI_FLOW
+        --description="UX for git+image version-reporter"
+        --template=artifact,branch-coverage
+#        --template=artifact,branch-coverage,security-scan,pull-request,manual-approval
 
-# build-job:
-#   stage: build
-#   needs: ["create-kosli-flow"]
-#   services:
-#     - docker:24.0.5-dind
-#   artifacts:
-#     paths: [ output/ ]
-#   script:
-#     - source ./sh/echo_versioner_env_vars.sh
-#     - export $(echo_versioner_env_vars)
-#     - docker-compose build --build-arg COMMIT_SHA=$CI_COMMIT_SHA
-#     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
-#     - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
-#     - docker push cyberdojo/version-reporter:$IMAGE_TAG
-#     - kosli report artifact cyberdojo/version-reporter:$IMAGE_TAG --artifact-type=docker
-#     - FINGERPRINT=$(kosli fingerprint cyberdojo/version-reporter:$IMAGE_TAG --artifact-type=docker)
-#     - mkdir output
-#     - echo $FINGERPRINT > output/fingerprint
+build-job:
+  stage: build
+  needs: ["create-kosli-flow"]
+  services:
+    - docker:24.0.5-dind
+  artifacts:
+    paths: [ output/ ]
+  script:
+    - source ./sh/echo_versioner_env_vars.sh
+    - export $(echo_versioner_env_vars)
+    - docker-compose build --build-arg COMMIT_SHA=$CI_COMMIT_SHA
+    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
+    - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
+    - docker push cyberdojo/version-reporter:$IMAGE_TAG
+    - kosli report artifact cyberdojo/version-reporter:$IMAGE_TAG --artifact-type=docker
+    - FINGERPRINT=$(kosli fingerprint cyberdojo/version-reporter:$IMAGE_TAG --artifact-type=docker)
+    - mkdir output
+    - echo $FINGERPRINT > output/fingerprint
 
-# branch-coverage-job:
-#   stage: test
-#   needs: ["build-job"]
-#   services:
-#     - docker:24.0.5-dind
-#   artifacts:
-#     paths: [ output/ ]
-#   script:
-#     - source ./sh/run_tests_with_coverage.sh
-#     - if run_tests_with_coverage; then KOSLI_COMPLIANT=true; else KOSLI_COMPLIANT=false; fi
-#     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
-#     - kosli report evidence artifact generic cyberdojo/version-reporter:$IMAGE_TAG
-#           --fingerprint=$(cat output/fingerprint)
-#           --compliant=$KOSLI_COMPLIANT
-#           --description="server & client branch-coverage reports"
-#           --name=branch-coverage
-#           --user-data=./test/evidence.json
+branch-coverage-job:
+  stage: test
+  needs: ["build-job"]
+  services:
+    - docker:24.0.5-dind
+  artifacts:
+    paths: [ output/ ]
+  script:
+    - source ./sh/run_tests_with_coverage.sh
+    - if run_tests_with_coverage; then KOSLI_COMPLIANT=true; else KOSLI_COMPLIANT=false; fi
+    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
+    - kosli report evidence artifact generic cyberdojo/version-reporter:$IMAGE_TAG
+          --fingerprint=$(cat output/fingerprint)
+          --compliant=$KOSLI_COMPLIANT
+          --description="server & client branch-coverage reports"
+          --name=branch-coverage
+          --user-data=./test/evidence.json
 
 # security-scan-job:
 #   stage: test
@@ -87,22 +87,24 @@ variables:
 #        --name=pull-request
 #        --gitlab-token=?????
 
-# sdlc-gate-job:
-#   stage: test
-#   needs:
-#     - branch-coverage-job
-#     - security-scan-job
-# #    - pull-request-job
-#   artifacts:
-#     paths: [ output/ ]
-#   script:
-#     - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
-#     - kosli assert artifact cyberdojo/version-reporter:$IMAGE_TAG
-#         --fingerprint=$(cat output/fingerprint)
+sdlc-gate-job:
+  stage: test
+  needs:
+    - branch-coverage-job
+    # - security-scan-job
+#    - pull-request-job
+  artifacts:
+    paths: [ output/ ]
+  script:
+    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
+    - kosli assert artifact cyberdojo/version-reporter:$IMAGE_TAG
+        --fingerprint=$(cat output/fingerprint)
 
 beta-deployment-job:
-  # needs: [ "sdlc-gate-job" ]
+  needs: [ "sdlc-gate-job" ]
   stage: deployment
+  artifacts:
+    paths: [ output/ ]
   variables:
     AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_BETA}
     AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_BETA}
@@ -116,7 +118,7 @@ beta-deployment-job:
     - cd deployment/terraform && tf.sh apply
 
 #prod-deployment-job:
-#  needs: [ "prod-deployment-job" ]
+#  needs: [ "beta-deployment-job" ]
 #  stage: deployment
 #  script:
 #    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
