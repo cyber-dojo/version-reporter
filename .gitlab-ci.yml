@@ -47,13 +47,14 @@ branch-coverage-job:
           --name=branch-coverage
           --user-data=./test/evidence.json
 
-#security-scan-job:
-#  stage: test
-#  services:
-#    - docker:24.0.5-dind
-#  needs: ["build-job"]
-#  script:
-#    - set +e
+security-scan-job:
+ stage: test
+ services:
+   - docker:24.0.5-dind
+ needs: ["build-job"]
+ script:
+   - set +e
+   - snyk --version
 #    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
 #    - docker pull cyberdojo/version-reporter:$IMAGE_TAG
 #    - snyk container test cyberdojo/version-reporter:$IMAGE_TAG

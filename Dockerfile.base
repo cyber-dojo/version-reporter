@@ -2,10 +2,11 @@ FROM docker:24.0.5
 
 ARG TERRAFORM_VERSION=1.6.3
 ARG KOSLI_CLI_VERSION=2.6.12
+ARG SNYK_VERSION=1.1243.0
 
 # install dependencies
 RUN apk update \
- && apk add curl unzip sudo git bash
+ && apk add curl unzip sudo git bash libstdc++
 
 # Install Kosli
 RUN curl -L https://github.com/kosli-dev/cli/releases/download/v${KOSLI_CLI_VERSION}/kosli_${KOSLI_CLI_VERSION}_linux_amd64.tar.gz | tar zx \
@@ -13,3 +14,8 @@ RUN curl -L https://github.com/kosli-dev/cli/releases/download/v${KOSLI_CLI_VERS
 
 # Install terraform
 RUN curl "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" -o terraform_${TERRAFORM_VERSION}_linux_amd64.zip && unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip && mv terraform ./bin/
+
+# Install Snyk
+RUN curl -L https://github.com/snyk/cli/releases/download/v${SNYK_VERSION}/snyk-alpine -o snyk \
+      && chmod +x ./snyk \
+      && mv ./snyk /usr/local/bin/
