@@ -31,9 +31,9 @@ build-job:
     - docker push cyberdojo/version-reporter:$IMAGE_TAG
     - kosli report artifact cyberdojo/version-reporter:$IMAGE_TAG --artifact-type=docker
     - FINGERPRINT=$(kosli fingerprint cyberdojo/version-reporter:$IMAGE_TAG --artifact-type=docker)
-    - mkdir outputs
-    - echo $FINGERPRINT > outputs/fingerprint
-    - cat outputs/fingerprint
+    - mkdir output
+    - echo $FINGERPRINT > output/fingerprint
+    - cat output/fingerprint
   artifacts:
     paths: [ output/ ]
 
@@ -62,7 +62,7 @@ security-scan-job:
    - set +e
    - ls -la /bin/
    - snyk --version
-   - cat outputs/fingerprint
+   - cat output/fingerprint
 
 #    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
 #    - docker pull cyberdojo/version-reporter:$IMAGE_TAG
