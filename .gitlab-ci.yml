@@ -112,7 +112,7 @@ beta-deployment-job:
 #        --fingerprint=$(cat output/fingerprint)
 #        --description "Deployed to aws-beta in Gitlab pipeline"
 #        --environment aws-beta
-    - tf.sh plan
+    - cd deployment/terraform && tf.sh plan
 
 #prod-deployment-job:
 #  needs: [ "prod-deployment-job" ]
