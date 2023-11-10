@@ -18,4 +18,4 @@ RUN curl "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terrafor
 # Install Snyk
 RUN curl -L https://github.com/snyk/cli/releases/download/v${SNYK_VERSION}/snyk-alpine -o snyk \
       && chmod +x ./snyk \
-      && mv ./snyk /usr/local/bin/
+      && sudo mv ./snyk /bin/snyk

@@ -54,6 +54,7 @@ security-scan-job:
  needs: ["build-job"]
  script:
    - set +e
+   - ls -la /bin/
    - snyk --version
 #    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
 #    - docker pull cyberdojo/version-reporter:$IMAGE_TAG
