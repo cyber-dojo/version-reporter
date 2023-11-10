@@ -11,17 +11,17 @@ variables:
   KOSLI_FLOW: version-reporter
   DOCKER_TLS_CERTDIR: "/certs"
 
-#create-kosli-flow:
-#  stage: .pre
-#  script:
-#    - kosli create flow $KOSLI_FLOW
-#        --api-token=$KOSLI_API_TOKEN
-#        --description="UX for git+image version-reporter"
-#        --template=artifact,branch-coverage
+create-kosli-flow:
+  stage: .pre
+  script:
+    - kosli create flow $KOSLI_FLOW
+        --description="UX for git+image version-reporter"
+        --template=artifact,branch-coverage
 #        --template=artifact,branch-coverage,security-scan,pull-request,manual-approval
 
 build-job:
   stage: build
+  needs: ["create-kosli-flow"]
   services:
     - docker:24.0.5-dind
   artifacts:
@@ -57,25 +57,25 @@ branch-coverage-job:
           --user-data=./test/evidence.json
 
 #security-scan-job:
-# stage: test
-# needs: ["build-job"]
-# services:
-#   - docker:24.0.5-dind
+#  stage: test
+#  needs: ["build-job"]
+#  services:
+#    - docker:24.0.5-dind
 #  artifacts:
 #    paths: [ output/ ]
-# script:
-#   - set +e
-#   - ls -la /bin/
-#   - snyk --version
-#   - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
-#   - snyk container test cyberdojo/version-reporter:$IMAGE_TAG
-#       --file=Dockerfile
-#       --json-file-output=snyk.json
-#       --policy-path=.snyk
-#   - kosli report evidence artifact snyk cyberdojo/version-reporter:$IMAGE_TAG
-#       --fingerprint=$(cat output/fingerprint)
-#       --name=security-scan
-#       --scan-results=snyk.json
+#  script:
+#    - set +e
+#    - ls -la /bin/
+#    - snyk --version
+#    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
+#    - snyk container test cyberdojo/version-reporter:$IMAGE_TAG
+#        --file=Dockerfile
+#        --json-file-output=snyk.json
+#        --policy-path=.snyk
+#    - kosli report evidence artifact snyk cyberdojo/version-reporter:$IMAGE_TAG
+#        --fingerprint=$(cat output/fingerprint)
+#        --name=security-scan
+#        --scan-results=snyk.json
 
 #pull-request-job:
 #  stage: test
@@ -97,8 +97,8 @@ sdlc-gate-job:
     - branch-coverage-job
 #    - security-scan-job
 #    - pull-request-job
-  services:
-    - docker:24.0.5-dind
+#  services:
+#    - docker:24.0.5-dind
   artifacts:
     paths: [ output/ ]
   script:
@@ -106,13 +106,13 @@ sdlc-gate-job:
     - kosli assert artifact cyberdojo/version-reporter:$IMAGE_TAG
         --fingerprint=$(cat output/fingerprint)
 
-#beta-deployment-job:
-#  needs: ["sdlc-gate-job"]
-#  stage: deployment
+beta-deployment-job:
+  needs: ["sdlc-gate-job"]
+  stage: deployment
 #  services:
 #    - docker:24.0.5-dind
-#  script:
-#    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
+  script:
+    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
 #    - kosli expect deployment cyberdojo/version-reporter:$IMAGE_TAG
 #        --fingerprint=$(cat output/fingerprint)
 #        --description "Deployed to aws-beta in Gitlab pipeline"
