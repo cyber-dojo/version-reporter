@@ -3,6 +3,7 @@ stages:
   - .pre
   - build
   - test
+  - deployment
 
 variables:
   KOSLI_DRY_RUN: "False"
