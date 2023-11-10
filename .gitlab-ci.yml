@@ -18,7 +18,6 @@ create-kosli-flow:
     - kosli create flow $KOSLI_FLOW
         --description="UX for git+image version-reporter"
         --template=artifact,branch-coverage,security-scan,pull-request
-#        --template=artifact,branch-coverage,security-scan,pull-request,manual-approval
 
 build-job:
   stage: build
