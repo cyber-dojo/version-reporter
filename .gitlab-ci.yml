@@ -112,7 +112,7 @@ beta-deployment-job:
 #    - DEPLOY_TO_AWS_BETA
 
 #prod-deployment-job:
-#  needs: ["manual-approval-job"]
+#  needs: ["prod-deployment-job"]
 #  stage: deployment
 #  script:
 #    - IMAGE_TAG=${CI_COMMIT_SHA:0:7}
