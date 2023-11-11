@@ -38,3 +38,9 @@ Eg https://app.kosli.com/cyber-dojo/environments/aws-beta/snapshots/2121?active_
 The top-most artifact is version-reporter
 Click its "Deployment diff" dropdown.
 There is no Deployment diff URL
+
+TODO: also send all kosli reports to https://staging.app.kosli.com
+At the moment https://staging.app.kosli.com is showing the
+cyber-dojo environments as being non-compliant.
+This is correct. The version-reporter images are being seen as
+no-provenance because there have been no artifact reports to https://staging.app.kosli.com
