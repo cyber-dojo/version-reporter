@@ -111,19 +111,20 @@ beta-deployment-job:
     - export TF_VAR_TAGGED_IMAGE=$(cat output/tagged_image)
     - cd deployment/terraform && tf.sh apply
 
-prod-deployment-approval-job:
+approval-job:
   needs: [ "beta-deployment-job" ]
   stage: deploy-image
   artifacts:
     paths: [ output/ ]
   when: manual
+  allow_failure: false
   script:
     - kosli report approval $(cat output/tagged_image)
          --fingerprint=$(cat output/fingerprint)
          --description="Approved in Gitlab pipeline"
 
 prod-deployment-job:
-  needs: [ "prod-deployment-approval-job" ]
+  needs: [ "approval-job" ]
   stage: deploy-image
   artifacts:
     paths: [ output/ ]
@@ -142,6 +143,8 @@ push-latest-image:
   needs: [ "prod-deployment-job" ]
   services: [ "docker:24.0.5-dind" ]
   stage: deploy-image
+  artifacts:
+    paths: [ output/ ]
   script:
     - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
     - docker tag $(cat output/tagged_image) cyberdojo/version-reporter:latest
