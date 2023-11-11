@@ -120,6 +120,7 @@ prod-deployment-job:
     AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_PROD}
     AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_PROD}
   script:
+    - echo WIP
 #    - kosli expect deployment $(cat output/tagged_image)
 #        --fingerprint=$(cat output/fingerprint)
 #        --description "Deployed to aws-prod in Gitlab pipeline"
