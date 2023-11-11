@@ -111,20 +111,21 @@ beta-deployment-job:
     - export TF_VAR_TAGGED_IMAGE=$(cat output/tagged_image)
     - cd deployment/terraform && tf.sh apply
 
-approval-job:
-  needs: [ "beta-deployment-job" ]
-  stage: deploy-image
-  artifacts:
-    paths: [ output/ ]
-  when: manual
-  allow_failure: false
-  script:
-    - kosli report approval $(cat output/tagged_image)
-         --fingerprint=$(cat output/fingerprint)
-         --description="Approved in Gitlab pipeline"
+#approval-job:
+#  needs: [ "beta-deployment-job" ]
+#  stage: deploy-image
+#  artifacts:
+#    paths: [ output/ ]
+#  when: manual
+#  allow_failure: false
+#  script:
+#    - kosli report approval $(cat output/tagged_image)
+#         --fingerprint=$(cat output/fingerprint)
+#         --description="Approved in Gitlab pipeline"
+#    #    --oldest-commit=?????
 
 prod-deployment-job:
-  needs: [ "approval-job" ]
+  needs: [ "beta-deployment-job" ]
   stage: deploy-image
   artifacts:
     paths: [ output/ ]
