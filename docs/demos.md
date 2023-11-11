@@ -49,3 +49,16 @@ WIP
 
 # Use the kosli assert artifact command as policy enforcement point
 See sdlc-gate-job: in .gitlab-ci.yml
+
+# Gitlab Demo
+
+Lead time from commit to aws-prod is going to be ~10min
+(or ~7mins if we don't deploy to aws-beta).
+
+If you do each one demo for each of the three test jobs it will take a long time!
+You could do all three in one commit
+  1) add snyk vulnerability
+  2) comment out tests
+  3) git push not in pull-request
+You could make a pre-recorded video and get JC to cut out the waiting?
+These would be great for social media...
