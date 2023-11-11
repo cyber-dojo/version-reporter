@@ -12,16 +12,29 @@ You could do all three in one commit
 You could make a pre-recorded video and get JC to cut out the waiting?
 These would be great for social media...
 
-TODO: kosli report approval
-How do I find the --oldest-commit value?
-
-TODO: Rename environments.
-The ECS cluster for staging cyber-dojo
-The ECS cluster for production cyber-dojo
-
-TODO: Deployment diff not working for version-reporter
-(on snapshot page)
-
 TODO: snyk needs authenticated account.
 IIRC using Sami's...
 Still ok for now
+
+TODO: pull-request-job
+Needs working gitlab-token. The one we tried gives 403 Forbidden.
+There is no information on the URL being forbidden but we assume
+it is from the Kosli CLI.
+
+TODO: approval-job
+$ kosli report approval ...
+How do I find the --oldest-commit value?
+
+TODO: prod-deployment-job
+Needs env-vars for AWS_ACCESS_KEY_ID_PROD and AWS_SECRET_ACCESS_KEY_PROD
+
+TODO: Change environment descriptions.
+aws-beta == "The ECS cluster for staging cyber-dojo"
+aws-prod == "The ECS cluster for production cyber-dojo"
+There seems to be no API to do this.
+
+TODO: Deployment diff not working for version-reporter
+Eg https://app.kosli.com/cyber-dojo/environments/aws-beta/snapshots/2121?active_tab=running
+The top-most artifact is version-reporter
+Click its "Deployment diff" dropdown.
+There is no Deployment diff URL
