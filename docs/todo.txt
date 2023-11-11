@@ -25,6 +25,3 @@ TODO: Deployment diff not working for version-reporter
 TODO: snyk needs authenticated account.
 IIRC using Sami's...
 Still ok for now
-
-
-
