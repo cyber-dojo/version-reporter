@@ -147,6 +147,7 @@ push-latest-image:
   artifacts:
     paths: [ output/ ]
   script:
-    - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
+    - docker pull $(cat output/tagged_image)
     - docker tag $(cat output/tagged_image) cyberdojo/version-reporter:latest
+    - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
     - docker push cyberdojo/version-reporter:latest

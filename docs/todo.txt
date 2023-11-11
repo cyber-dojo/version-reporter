@@ -12,21 +12,17 @@ You could do all three in one commit
 You could make a pre-recorded video and get JC to cut out the waiting?
 These would be great for social media...
 
-
-Add manual-approval step.
-What do you mean by this? Do you mean a Kosli approval?
-Gitlab manual job
-click it
-then create kosli approval
-Not in the template.
+TODO: kosli report approval
+How do I find the --oldest-commit value?
 
 TODO: Rename environments.
 The ECS cluster for staging cyber-dojo
 The ECS cluster for production cyber-dojo
 
-TODO: Deployment diff not working for version-reporter (on snapshot page)
+TODO: Deployment diff not working for version-reporter
+(on snapshot page)
 
-snyk needs authenticated account.
+TODO: snyk needs authenticated account.
 IIRC using Sami's...
 Still ok for now
 
