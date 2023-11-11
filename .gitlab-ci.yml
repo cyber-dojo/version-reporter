@@ -17,7 +17,8 @@ create-kosli-flow:
   script:
     - kosli create flow $KOSLI_FLOW
         --description="UX for git+image version-reporter"
-        --template=artifact,branch-coverage,security-scan,pull-request
+        --template=artifact,branch-coverage
+        # --template=artifact,branch-coverage,security-scan,pull-request
 
 build-job:
   stage: build
@@ -110,17 +111,25 @@ beta-deployment-job:
     - export TF_VAR_TAGGED_IMAGE=$(cat output/tagged_image)
     - cd deployment/terraform && tf.sh apply
 
- #prod-deployment-job:
- #  needs: [ "beta-deployment-job" ]
- #  stage: deployment
- #  artifacts:
- #    paths: [ output/ ]
- #  variables:
- #    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_PROD}
- #    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_PROD}
- #  script:
- #    - kosli expect deployment $(cat output/tagged_image)
- #        --fingerprint=$(cat output/fingerprint)
- #        --description "Deployed to aws-prod in Gitlab pipeline"
- #        --environment aws-prod
- #    - DEPLOY_TO_AWS_PROD
+prod-deployment-job:
+  needs: [ "beta-deployment-job" ]
+  stage: deployment
+  artifacts:
+    paths: [ output/ ]
+  variables:
+    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_PROD}
+    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_PROD}
+  script:
+#    - kosli expect deployment $(cat output/tagged_image)
+#        --fingerprint=$(cat output/fingerprint)
+#        --description "Deployed to aws-prod in Gitlab pipeline"
+#        --environment aws-prod
+#    - DEPLOY_TO_AWS_PROD
+
+push-latest-image:
+  needs: [ "prod-deployment-job" ]
+  stage: deployment
+  script:
+    - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
+    - docker tag $(cat output/tagged_image) cyberdojo/version-reporter:latest
+    - docker push cyberdojo/version-reporter:latest

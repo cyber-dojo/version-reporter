@@ -6,8 +6,8 @@ into its own independently deployable service so that it can be
 the service used to test changes to the deployment pipeline.
 For example, when there is a Helm chart upgrade.
 
-To build the Gitlab runner...
+To build the main Alpine Gitlab runner...
 docker build -t registry.gitlab.com/cyber-dojo/version-reporter:v1 -f Dockerfile.base .
 
-To push it to the gitlab registry
-docker push registry.gitlab.com/cyber-dojo/version-reporter:v1
+To build the Ubuntu Gitlab runner (for snyk)...
+docker build -t registry.gitlab.com/cyber-dojo/version-reporter:v1-ubuntu -f Dockerfile.base.ubuntu .

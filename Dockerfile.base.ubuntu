@@ -4,7 +4,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG KOSLI_CLI_VERSION=2.6.12
 ARG SNYK_VERSION=1.1243.0
 
-# install dependencies
+# Install dependencies
 RUN apt-get update \
       && apt-get install curl unzip sudo git bash awscli docker.io -y
 

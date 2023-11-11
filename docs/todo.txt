@@ -5,17 +5,13 @@ Lead time from commit to aws-prod is going to be ~10min
 (or ~7mins if we don't deploy to aws-beta).
 
 If you do each one demo for each of the three test jobs it will take a long time!
-You could do all three
-  1) snyk vulnerability
-  2) missing coverage
-  3) no pull-request
-in a single commit? Yes.
+You could do all three in one commit
+  1) add snyk vulnerability
+  2) comment out tests
+  3) git push not in pull-request
 You could make a pre-recorded video and get JC to cut out the waiting?
 These would be great for social media...
 
-
-Add evidence reporting for binary-provenance
-Does this means kosli assert artifact ? Yes.
 
 Add manual-approval step.
 What do you mean by this? Do you mean a Kosli approval?
@@ -30,18 +26,9 @@ The ECS cluster for production cyber-dojo
 
 TODO: Deployment diff not working for version-reporter (on snapshot page)
 
-400 min limit. Mike has bought an extra 1000 mins
-
 snyk needs authenticated account.
 IIRC using Sami's...
 Still ok for now
-
-
-cyberdojo/versioner needs cyberdojo/version-reporter:latest
-to be what is running in aws-prod.
-So add
-$ docker tag cyberdojo/version-reporter:$TAG cyberdojo/version-reporter:latest
-$ docker push cyberdojo/version-reporter:latest
 
 
 
