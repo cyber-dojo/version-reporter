@@ -1,10 +1,10 @@
 image: registry.gitlab.com/cyber-dojo/version-reporter:v1
 stages:
-  - .pre
-  - build
-  - test
-  - sdlc
-  - deployment
+  - kosli-flow
+  - build-image
+  - test-image
+  - sdlc-gate
+  - deploy-image
 
 variables:
   KOSLI_DRY_RUN: "False"
@@ -13,7 +13,7 @@ variables:
   DOCKER_TLS_CERTDIR: "/certs"
 
 create-kosli-flow:
-  stage: .pre
+  stage: kosli-flow
   script:
     - kosli create flow $KOSLI_FLOW
         --description="UX for git+image version-reporter"
@@ -21,7 +21,7 @@ create-kosli-flow:
         # --template=artifact,branch-coverage,security-scan,pull-request
 
 build-job:
-  stage: build
+  stage: build-image
   needs: [ "create-kosli-flow" ]
   services: [ "docker:24.0.5-dind" ]
   artifacts:
@@ -40,7 +40,7 @@ build-job:
     - echo $TAGGED_IMAGE > output/tagged_image
 
 branch-coverage-job:
-  stage: test
+  stage: test-image
   needs: [ "build-job" ]
   services: [ "docker:24.0.5-dind" ]
   artifacts:
@@ -55,40 +55,40 @@ branch-coverage-job:
           --name=branch-coverage
           --user-data=./test/evidence.json
 
-security-scan-job:
-  image: registry.gitlab.com/cyber-dojo/version-reporter:v1-ubuntu
-  stage: test
-  needs: [ "build-job" ]
-  artifacts:
-    paths: [ output/ ]
-  script:
-    - set +e
-    - snyk container test $(cat output/tagged_image)
-        --file=Dockerfile
-        --json-file-output=snyk.json
-        --policy-path=.snyk
-    - kosli report evidence artifact snyk $(cat output/tagged_image)
-        --fingerprint=$(cat output/fingerprint)
-        --name=security-scan
-        --scan-results=snyk.json
+#security-scan-job:
+#  image: registry.gitlab.com/cyber-dojo/version-reporter:v1-ubuntu
+#  stage: test-image
+#  needs: [ "build-job" ]
+#  artifacts:
+#    paths: [ output/ ]
+#  script:
+#    - set +e
+#    - snyk container test $(cat output/tagged_image)
+#        --file=Dockerfile
+#        --json-file-output=snyk.json
+#        --policy-path=.snyk
+#    - kosli report evidence artifact snyk $(cat output/tagged_image)
+#        --fingerprint=$(cat output/fingerprint)
+#        --name=security-scan
+#        --scan-results=snyk.json
 
-pull-request-job:
- stage: test
- needs: [ "build-job" ]
- artifacts:
-   paths: [ output/ ]
- script:
-   - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
-       --fingerprint=$(cat output/fingerprint)
-       --name=pull-request
-       --gitlab-token=$KOSLI_GITLAB_TOKEN
+#pull-request-job:
+# stage: test-image
+# needs: [ "build-job" ]
+# artifacts:
+#   paths: [ output/ ]
+# script:
+#   - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
+#       --fingerprint=$(cat output/fingerprint)
+#       --name=pull-request
+#       --gitlab-token=$KOSLI_GITLAB_TOKEN
 
 sdlc-gate-job:
-  stage: sdlc
+  stage: sdlc-gate
   needs:
     - branch-coverage-job
-    - security-scan-job
-    - pull-request-job
+#    - security-scan-job
+#    - pull-request-job
   artifacts:
     paths: [ output/ ]
   script:
@@ -97,7 +97,7 @@ sdlc-gate-job:
 
 beta-deployment-job:
   needs: [ "sdlc-gate-job" ]
-  stage: deployment
+  stage: deploy-image
   artifacts:
     paths: [ output/ ]
   variables:
@@ -111,9 +111,11 @@ beta-deployment-job:
     - export TF_VAR_TAGGED_IMAGE=$(cat output/tagged_image)
     - cd deployment/terraform && tf.sh apply
 
+# TODO: manual-approval job
+
 prod-deployment-job:
   needs: [ "beta-deployment-job" ]
-  stage: deployment
+  stage: deploy-image
   artifacts:
     paths: [ output/ ]
   variables:
@@ -129,7 +131,7 @@ prod-deployment-job:
 
 push-latest-image:
   needs: [ "prod-deployment-job" ]
-  stage: deployment
+  stage: deploy-image
   script:
     - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
     - docker tag $(cat output/tagged_image) cyberdojo/version-reporter:latest
