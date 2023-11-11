@@ -1,3 +1,12 @@
+Here is a URL for a cyber-dojo practice session
+https://beta.cyber-dojo.org/kata/edit/9yAkDD
+Click the (i) button on the top bar (to the right of the ID==9yAkDD)
+This reveals 5 buttons.
+Then click the [versions] button.
+This will take you to:
+https://beta.cyber-dojo.org/version-reporter/index
+This shows the git commit (+link) for all microservices (including version-reporter itself)
+
 
 # Fail deployment when a commit lowers code coverage
 
