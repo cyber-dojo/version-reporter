@@ -1,15 +1,8 @@
 image: registry.gitlab.com/cyber-dojo/version-reporter:v1
 
-# .default_rules:
-#   rules:
-#     - if: $CI_COMMIT_BRANCH == "main"
-
-#   rules:
-#     - !reference [.default_rules, rules]
-
-#.only-main:
-#  only:
-#   - main
+.only-main:
+ only:
+  - main
 
 stages:
   - kosli-flow
@@ -37,13 +30,16 @@ variables:
     - cd deployment/terraform && tf.sh apply
 
 create-kosli-flow:
+  extends: [.only-main]
   stage: kosli-flow
   script:
     - kosli create flow $KOSLI_FLOW
         --description="UX for git+image version-reporter"
-        --template=artifact,branch-coverage,security-scan,pull-request
+        --template=artifact,branch-coverage,security-scan
+        # --template=artifact,branch-coverage,security-scan,pull-request
 
 build-job:
+  extends: [.only-main]
   stage: build-image
   needs: [ "create-kosli-flow" ]
   services: [ "docker:24.0.5-dind" ]
@@ -63,6 +59,7 @@ build-job:
     - echo $TAGGED_IMAGE > output/tagged_image
 
 branch-coverage-job:
+  extends: [.only-main]
   stage: test-image
   needs: [ "build-job" ]
   services: [ "docker:24.0.5-dind" ]
@@ -79,6 +76,7 @@ branch-coverage-job:
           --user-data=./test/evidence.json
 
 security-scan-job:
+  extends: [.only-main]
   image: registry.gitlab.com/cyber-dojo/version-reporter:v1-ubuntu
   stage: test-image
   needs: [ "build-job" ]
@@ -95,18 +93,20 @@ security-scan-job:
         --name=security-scan
         --scan-results=snyk.json
 
-pull-request-job:
-  stage: test-image
-  needs: [ "build-job" ]
-  artifacts:
-    paths: [ output/ ]
-  script:
-    - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
-        --fingerprint=$(cat output/fingerprint)
-        --name=pull-request
-        --gitlab-token=$KOSLI_GITLAB_TOKEN
+# pull-request-job:
+#   extends: [.only-main]
+#   stage: test-image
+#   needs: [ "build-job" ]
+#   artifacts:
+#     paths: [ output/ ]
+#   script:
+#     - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
+#         --fingerprint=$(cat output/fingerprint)
+#         --name=pull-request
+#         --gitlab-token=$KOSLI_GITLAB_TOKEN
 
 sdlc-gate-job:
+  extends: [.only-main]
   stage: sdlc-gate
   needs:
     - branch-coverage-job
@@ -119,7 +119,7 @@ sdlc-gate-job:
         --fingerprint=$(cat output/fingerprint)
 
 beta-deployment-job:
-  extends: .deployment-job
+  extends: [.only-main, .deployment-job]
   needs: [ "sdlc-gate-job" ]
   variables:
     AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_BETA}
@@ -127,6 +127,7 @@ beta-deployment-job:
     KOSLI_ENVIRONMENT_NAME: aws-beta
 
 approval-job:
+  extends: [.only-main]
   needs: [ "beta-deployment-job" ]
   stage: deploy-image
   artifacts:
@@ -140,7 +141,7 @@ approval-job:
         --oldest-commit=origin/production
 
 prod-deployment-job:
-  extends: .deployment-job
+  extends: [.only-main, .deployment-job]
   needs: [ "beta-deployment-job" ]
   variables:
     AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_PROD}
@@ -148,6 +149,7 @@ prod-deployment-job:
     KOSLI_ENVIRONMENT_NAME: aws-prod
 
 update-git-tracking-branch:
+  extends: [.only-main]
   needs: [ "prod-deployment-job" ]
   stage: deploy-image
   script:
@@ -157,6 +159,7 @@ update-git-tracking-branch:
     - git push origin production
 
 push-latest-image:
+  extends: [.only-main]
   needs: [ "update-git-tracking-branch" ]
   services: [ "docker:24.0.5-dind" ]
   stage: deploy-image
