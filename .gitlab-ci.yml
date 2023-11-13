@@ -35,8 +35,7 @@ create-kosli-flow:
   script:
     - kosli create flow $KOSLI_FLOW
         --description="UX for git+image version-reporter"
-        --template=artifact,branch-coverage,security-scan
-        # --template=artifact,branch-coverage,security-scan,pull-request
+        --template=artifact,branch-coverage,security-scan,pull-request
 
 build-job:
   extends: [.only-main]
@@ -93,17 +92,17 @@ security-scan-job:
         --name=security-scan
         --scan-results=snyk.json
 
-# pull-request-job:
-#   extends: [.only-main]
-#   stage: test-image
-#   needs: [ "build-job" ]
-#   artifacts:
-#     paths: [ output/ ]
-#   script:
-#     - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
-#         --fingerprint=$(cat output/fingerprint)
-#         --name=pull-request
-#         --gitlab-token=$KOSLI_GITLAB_TOKEN
+pull-request-job:
+  extends: [.only-main]
+  stage: test-image
+  needs: [ "build-job" ]
+  artifacts:
+    paths: [ output/ ]
+  script:
+    - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
+        --fingerprint=$(cat output/fingerprint)
+        --name=pull-request
+        --gitlab-token=$KOSLI_GITLAB_TOKEN
 
 sdlc-gate-job:
   extends: [.only-main]
@@ -111,7 +110,7 @@ sdlc-gate-job:
   needs:
     - branch-coverage-job
     - security-scan-job
-    # - pull-request-job
+    - pull-request-job
   artifacts:
     paths: [ output/ ]
   script:
@@ -141,22 +140,22 @@ approval-job:
         --oldest-commit=origin/production
 
 prod-deployment-job:
-  extends: [.only-main, .deployment-job]
+  extends: [.only-main, .approval-job]
   needs: [ "beta-deployment-job" ]
   variables:
     AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_PROD}
     AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_PROD}
     KOSLI_ENVIRONMENT_NAME: aws-prod
 
-update-git-tracking-branch:
-  extends: [.only-main]
-  needs: [ "prod-deployment-job" ]
-  stage: deploy-image
-  script:
-    - git log --graph --full-history --all --color --date=short --pretty=format:"%Cred%x09%h %Creset%ad%Cblue%d %Creset %s %C(bold)(%an)%Creset" | head -n 30
-    - git checkout --track origin/production
-    - git merge --ff-only ${CI_COMMIT_SHA}
-    - git push origin production
+#update-git-tracking-branch:
+#  extends: [.only-main]
+#  needs: [ "prod-deployment-job" ]
+#  stage: deploy-image
+#  script:
+#    - git log --graph --full-history --all --color --date=short --pretty=format:"%Cred%x09%h %Creset%ad%Cblue%d %Creset %s %C(bold)(%an)%Creset" | head -n 30
+#    - git checkout --track origin/production
+#    - git merge --ff-only ${CI_COMMIT_SHA}
+#    - git push origin production
 
 push-latest-image:
   extends: [.only-main]
