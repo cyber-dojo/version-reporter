@@ -140,7 +140,7 @@ approval-job:
         --oldest-commit=origin/production
 
 prod-deployment-job:
-  extends: [.only-main]
+  extends: [.only-main, .deployment-job]
   needs: [ "approval-job" ]
   variables:
     AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_PROD}
