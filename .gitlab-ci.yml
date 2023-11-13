@@ -29,8 +29,8 @@ create-kosli-flow:
   script:
     - kosli create flow $KOSLI_FLOW
         --description="UX for git+image version-reporter"
-        --template=artifact
-        # --template=artifact,branch-coverage,security-scan,pull-request
+        # --template=artifact
+        --template=artifact,branch-coverage,security-scan,pull-request
 
 build-job:
   stage: build-image
@@ -51,99 +51,107 @@ build-job:
     - echo $FINGERPRINT  > output/fingerprint
     - echo $TAGGED_IMAGE > output/tagged_image
 
-#branch-coverage-job:
-#  stage: test-image
-#  needs: [ "build-job" ]
-#  services: [ "docker:24.0.5-dind" ]
-#  artifacts:
-#    paths: [ output/ ]
-#  script:
-#    - source ./sh/run_tests_with_coverage.sh
-#    - if run_tests_with_coverage; then KOSLI_COMPLIANT=true; else KOSLI_COMPLIANT=false; fi
-#    - kosli report evidence artifact generic $(cat output/tagged_image)
-#          --fingerprint=$(cat output/fingerprint)
-#          --compliant=$KOSLI_COMPLIANT
-#          --description="server & client branch-coverage reports"
-#          --name=branch-coverage
-#          --user-data=./test/evidence.json
+branch-coverage-job:
+  stage: test-image
+  needs: [ "build-job" ]
+  services: [ "docker:24.0.5-dind" ]
+  artifacts:
+    paths: [ output/ ]
+  script:
+    - source ./sh/run_tests_with_coverage.sh
+    - if run_tests_with_coverage; then KOSLI_COMPLIANT=true; else KOSLI_COMPLIANT=false; fi
+    - kosli report evidence artifact generic $(cat output/tagged_image)
+          --fingerprint=$(cat output/fingerprint)
+          --compliant=$KOSLI_COMPLIANT
+          --description="server & client branch-coverage reports"
+          --name=branch-coverage
+          --user-data=./test/evidence.json
 
 security-scan-job:
- image: registry.gitlab.com/cyber-dojo/version-reporter:v1-ubuntu
- stage: test-image
- needs: [ "build-job" ]
- artifacts:
-   paths: [ output/ ]
- script:
-   - set +e
-   - snyk container test $(cat output/tagged_image)
-       --file=Dockerfile
-       --json-file-output=snyk.json
-       --policy-path=.snyk
-   - kosli report evidence artifact snyk $(cat output/tagged_image)
-       --fingerprint=$(cat output/fingerprint)
-       --name=security-scan
-       --scan-results=snyk.json
+  image: registry.gitlab.com/cyber-dojo/version-reporter:v1-ubuntu
+  stage: test-image
+  needs: [ "build-job" ]
+  artifacts:
+    paths: [ output/ ]
+  script:
+    - set +e
+    - snyk container test $(cat output/tagged_image)
+        --file=Dockerfile
+        --json-file-output=snyk.json
+        --policy-path=.snyk
+    - kosli report evidence artifact snyk $(cat output/tagged_image)
+        --fingerprint=$(cat output/fingerprint)
+        --name=security-scan
+        --scan-results=snyk.json
 
-# pull-request-job:
-#   stage: test-image
-#   needs: [ "build-job" ]
-#   artifacts:
-#     paths: [ output/ ]
-#   script:
-#     - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
-#         --fingerprint=$(cat output/fingerprint)
-#         --name=pull-request
-#         --gitlab-token=$KOSLI_GITLAB_TOKEN
+pull-request-job:
+  stage: test-image
+  needs: [ "build-job" ]
+  artifacts:
+    paths: [ output/ ]
+  script:
+    - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
+        --fingerprint=$(cat output/fingerprint)
+        --name=pull-request
+        --gitlab-token=$KOSLI_GITLAB_TOKEN
 
-# sdlc-gate-job:
-#   stage: sdlc-gate
-# #  needs:
-# #    - branch-coverage-job
-# #    - security-scan-job
-# #    - pull-request-job
-#   artifacts:
-#     paths: [ output/ ]
-#   script:
-#     - kosli assert artifact $(cat output/tagged_image)
-#         --fingerprint=$(cat output/fingerprint)
+sdlc-gate-job:
+  stage: sdlc-gate
+  needs:
+    - branch-coverage-job
+    - security-scan-job
+    - pull-request-job
+  artifacts:
+    paths: [ output/ ]
+  script:
+    - kosli assert artifact $(cat output/tagged_image)
+        --fingerprint=$(cat output/fingerprint)
 
-# beta-deployment-job:
-#   extends: .deployment-job
-#   needs: [ "sdlc-gate-job" ]
-#   variables:
-#     AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_BETA}
-#     AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_BETA}
-#     KOSLI_ENVIRONMENT_NAME: aws-beta
+beta-deployment-job:
+  extends: .deployment-job
+  needs: [ "sdlc-gate-job" ]
+  variables:
+    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_BETA}
+    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_BETA}
+    KOSLI_ENVIRONMENT_NAME: aws-beta
 
-#approval-job:
-#  needs: [ "beta-deployment-job" ]
-#  stage: deploy-image
-#  artifacts:
-#    paths: [ output/ ]
-#  when: manual
-#  allow_failure: false
-#  script:
-#    - kosli report approval $(cat output/tagged_image)
-#         --fingerprint=$(cat output/fingerprint)
-#         --description="Approved in Gitlab pipeline"
-#    #    --oldest-commit=?????
+approval-job:
+  needs: [ "beta-deployment-job" ]
+  stage: deploy-image
+  artifacts:
+    paths: [ output/ ]
+  when: manual
+  allow_failure: false
+  script:
+    - kosli report approval $(cat output/tagged_image)
+        --fingerprint=$(cat output/fingerprint)
+        --description="Approved in Gitlab pipeline"
+        --oldest-commit=origin/production
 
-# prod-deployment-job:
-#   extends: .deployment-job
-#   needs: [ "beta-deployment-job" ]
-#   variables:
-#     AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_PROD}
-#     AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_PROD}
-#     KOSLI_ENVIRONMENT_NAME: aws-prod
+prod-deployment-job:
+  extends: .deployment-job
+  needs: [ "beta-deployment-job" ]
+  variables:
+    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_PROD}
+    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_PROD}
+    KOSLI_ENVIRONMENT_NAME: aws-prod
 
-# push-latest-image:
-#   needs: [ "prod-deployment-job" ]
-#   services: [ "docker:24.0.5-dind" ]
-#   stage: deploy-image
-#   artifacts:
-#     paths: [ output/ ]
-#   script:
-#     - docker pull $(cat output/tagged_image)
-#     - docker tag $(cat output/tagged_image) cyberdojo/version-reporter:latest
-#     - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
-#     - docker push cyberdojo/version-reporter:latest
+update-git-tracking-branch:
+  needs: [ "prod-deployment-job" ]
+  script:
+    - git log --graph --full-history --all --color --date=short --pretty=format:"%Cred%x09%h %Creset%ad%Cblue%d %Creset %s %C(bold)(%an)%Creset" | head -n 30
+    - git checkout --track origin/production
+    - git merge --ff-only ${CI_COMMIT_SHA}
+    - git push origin production
+
+push-latest-image:
+  needs: [ "update-git-tracking-branch" ]
+  services: [ "docker:24.0.5-dind" ]
+  stage: deploy-image
+  artifacts:
+    paths: [ output/ ]
+  script:
+    - docker pull $(cat output/tagged_image)
+    - docker tag $(cat output/tagged_image) cyberdojo/version-reporter:latest
+    - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
+    - docker push cyberdojo/version-reporter:latest
