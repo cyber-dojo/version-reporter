@@ -124,30 +124,30 @@ beta-deployment-job:
 #         --description="Approved in Gitlab pipeline"
 #    #    --oldest-commit=?????
 
-#  prod-deployment-job:
-#   needs: [ "beta-deployment-job" ]
-#   stage: deploy-image
-#   artifacts:
-#     paths: [ output/ ]
-#   variables:
-#     AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_PROD}
-#     AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_PROD}
-#   script:
-#     - kosli expect deployment $(cat output/tagged_image)
-#         --fingerprint=$(cat output/fingerprint)
-#         --description "Deployed to aws-prod in Gitlab pipeline"
-#         --environment aws-prod
-#     - export TF_VAR_TAGGED_IMAGE=$(cat output/tagged_image)
-#     - cd deployment/terraform && tf.sh apply
+prod-deployment-job:
+  needs: [ "beta-deployment-job" ]
+  stage: deploy-image
+  artifacts:
+    paths: [ output/ ]
+  variables:
+    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_PROD}
+    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_PROD}
+  script:
+    - kosli expect deployment $(cat output/tagged_image)
+        --fingerprint=$(cat output/fingerprint)
+        --description "Deployed to aws-prod in Gitlab pipeline"
+        --environment aws-prod
+    - export TF_VAR_TAGGED_IMAGE=$(cat output/tagged_image)
+    - cd deployment/terraform && tf.sh apply
 
-# push-latest-image:
-#   needs: [ "prod-deployment-job" ]
-#   services: [ "docker:24.0.5-dind" ]
-#   stage: deploy-image
-#   artifacts:
-#     paths: [ output/ ]
-#   script:
-#     - docker pull $(cat output/tagged_image)
-#     - docker tag $(cat output/tagged_image) cyberdojo/version-reporter:latest
-#     - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
-#     - docker push cyberdojo/version-reporter:latest
+push-latest-image:
+  needs: [ "prod-deployment-job" ]
+  services: [ "docker:24.0.5-dind" ]
+  stage: deploy-image
+  artifacts:
+    paths: [ output/ ]
+  script:
+    - docker pull $(cat output/tagged_image)
+    - docker tag $(cat output/tagged_image) cyberdojo/version-reporter:latest
+    - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
+    - docker push cyberdojo/version-reporter:latest
