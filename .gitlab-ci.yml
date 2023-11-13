@@ -1,4 +1,16 @@
 image: registry.gitlab.com/cyber-dojo/version-reporter:v1
+
+# .default_rules:
+#   rules:
+#     - if: $CI_COMMIT_BRANCH == "main"
+
+#   rules:
+#     - !reference [.default_rules, rules]
+
+.only-main:
+  only:
+   - main
+
 stages:
   - kosli-flow
   - build-image
@@ -29,8 +41,8 @@ create-kosli-flow:
   script:
     - kosli create flow $KOSLI_FLOW
         --description="UX for git+image version-reporter"
-        # --template=artifact
         --template=artifact,branch-coverage,security-scan,pull-request
+        # --template=artifact
 
 build-job:
   stage: build-image
@@ -129,7 +141,7 @@ approval-job:
         --oldest-commit=origin/production
 
 prod-deployment-job:
-  extends: .deployment-job
+  extends: [.deployment-job, .only-main]
   needs: [ "beta-deployment-job" ]
   variables:
     AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_PROD}
@@ -138,6 +150,7 @@ prod-deployment-job:
 
 update-git-tracking-branch:
   needs: [ "prod-deployment-job" ]
+  stage: deploy-image
   script:
     - git log --graph --full-history --all --color --date=short --pretty=format:"%Cred%x09%h %Creset%ad%Cblue%d %Creset %s %C(bold)(%an)%Creset" | head -n 30
     - git checkout --track origin/production
