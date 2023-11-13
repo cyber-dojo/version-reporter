@@ -85,15 +85,15 @@ build-job:
 #        --scan-results=snyk.json
 
 pull-request-job:
-stage: test-image
-# needs: [ "build-job" ]
-artifacts:
-  paths: [ output/ ]
-script:
-  - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
-      --fingerprint=$(cat output/fingerprint)
-      --name=pull-request
-      --gitlab-token=$KOSLI_GITLAB_TOKEN
+  stage: test-image
+  # needs: [ "build-job" ]
+  artifacts:
+    paths: [ output/ ]
+  script:
+    - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
+        --fingerprint=$(cat output/fingerprint)
+        --name=pull-request
+        --gitlab-token=$KOSLI_GITLAB_TOKEN
 
 # sdlc-gate-job:
 #   stage: sdlc-gate
