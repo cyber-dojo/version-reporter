@@ -31,7 +31,7 @@ start-kosli-trail:
 build:
   extends: [.only-main]
   stage: build-image
-  needs: [ "create-kosli-trail" ]
+  needs: [ "start-kosli-trail" ]
   services: [ "docker:24.0.5-dind" ]
   artifacts:
     paths: [ output/ ]
