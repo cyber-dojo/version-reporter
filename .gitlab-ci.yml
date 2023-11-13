@@ -1,8 +1,8 @@
 image: registry.gitlab.com/cyber-dojo/version-reporter:v1
 
 .only-main:
- only:
-  - main
+  only:
+    - main
 
 stages:
   - kosli-trail
@@ -25,8 +25,7 @@ start-kosli-trail:
   script:
     - kosli create flow $KOSLI_FLOW
         --description="UX for git+image version-reporter"
-        --template=artifact
-        # --template=artifact,branch-coverage,security-scan,pull-request
+        --template=artifact,branch-coverage,security-scan,pull-request
 
 build:
   extends: [.only-main]
@@ -58,12 +57,12 @@ branch-coverage:
   script:
     - source ./sh/run_tests_with_coverage.sh
     - if run_tests_with_coverage; then KOSLI_COMPLIANT=true; else KOSLI_COMPLIANT=false; fi
-    # - kosli report evidence artifact generic $(cat output/tagged_image)
-    #       --fingerprint=$(cat output/fingerprint)
-    #       --compliant=$KOSLI_COMPLIANT
-    #       --description="server & client branch-coverage reports"
-    #       --name=branch-coverage
-    #       --user-data=./test/evidence.json
+    - kosli report evidence artifact generic $(cat output/tagged_image)
+          --fingerprint=$(cat output/fingerprint)
+          --compliant=$KOSLI_COMPLIANT
+          --description="server & client branch-coverage reports"
+          --name=branch-coverage
+          --user-data=./test/evidence.json
 
 security-scan:
   extends: [.only-main]
@@ -74,14 +73,14 @@ security-scan:
     paths: [ output/ ]
   script:
     - set +e
-    # - snyk container test $(cat output/tagged_image)
-    #     --file=Dockerfile
-    #     --json-file-output=snyk.json
-    #     --policy-path=.snyk
-    # - kosli report evidence artifact snyk $(cat output/tagged_image)
-    #     --fingerprint=$(cat output/fingerprint)
-    #     --name=security-scan
-    #     --scan-results=snyk.json
+    - snyk container test $(cat output/tagged_image)
+        --file=Dockerfile
+        --json-file-output=snyk.json
+        --policy-path=.snyk
+    - kosli report evidence artifact snyk $(cat output/tagged_image)
+        --fingerprint=$(cat output/fingerprint)
+        --name=security-scan
+        --scan-results=snyk.json
 
 pull-request:
   extends: [.only-main]
@@ -170,7 +169,7 @@ prod-deployment:
 #    - git merge --ff-only ${CI_COMMIT_SHA}
 #    - git push origin production
 
-#push-latest-image:
+#push-latest-image-to-public-registry:
 #  extends: [.only-main]
 #  needs: [ "update-git-tracking-branch" ]
 #  services: [ "docker:24.0.5-dind" ]
