@@ -1,10 +1,13 @@
 
-TODO: Change environment descriptions.
+
+# TODO: Change environment descriptions.
+
 aws-beta == "The ECS cluster for staging cyber-dojo"
 aws-prod == "The ECS cluster for production cyber-dojo"
 There seems to be no API to do this.
 
-TODO: Deployment diff not working for version-reporter
+# TODO: Deployment diff not working for version-reporter
+
 Eg https://app.kosli.com/cyber-dojo/environments/aws-beta/snapshots/2121?active_tab=running
 The top-most artifact is cyberdojo/version-reporter:f497340
   https://app.kosli.com/cyber-dojo/flows/version-reporter/artifacts/6cc4af0e27e5399b0bc99da5f9cd5ae1c36d2e86ad353c1dbc7ec386b2196714
@@ -19,8 +22,11 @@ But in the Kosli UX (from the 1st URL in this TODO)
 Click its "Deployment diff" dropdown.
 There is no Deployment diff URL...
 
-TODO: also send all kosli reports to https://staging.app.kosli.com
+# TODO: also send all kosli reports to https://staging.app.kosli.com
+
 At the moment https://staging.app.kosli.com is showing the
 cyber-dojo environments as being non-compliant.
 This is correct. The version-reporter images are being seen as
 no-provenance because there have been no artifact reports to https://staging.app.kosli.com
+
+# TODO: The branch name in the artifact view is empty "()"
