@@ -67,33 +67,33 @@ build-job:
 #          --name=branch-coverage
 #          --user-data=./test/evidence.json
 
-#security-scan-job:
-#  image: registry.gitlab.com/cyber-dojo/version-reporter:v1-ubuntu
-#  stage: test-image
-#  needs: [ "build-job" ]
-#  artifacts:
-#    paths: [ output/ ]
-#  script:
-#    - set +e
-#    - snyk container test $(cat output/tagged_image)
-#        --file=Dockerfile
-#        --json-file-output=snyk.json
-#        --policy-path=.snyk
-#    - kosli report evidence artifact snyk $(cat output/tagged_image)
-#        --fingerprint=$(cat output/fingerprint)
-#        --name=security-scan
-#        --scan-results=snyk.json
+security-scan-job:
+ image: registry.gitlab.com/cyber-dojo/version-reporter:v1-ubuntu
+ stage: test-image
+ needs: [ "build-job" ]
+ artifacts:
+   paths: [ output/ ]
+ script:
+   - set +e
+   - snyk container test $(cat output/tagged_image)
+       --file=Dockerfile
+       --json-file-output=snyk.json
+       --policy-path=.snyk
+   - kosli report evidence artifact snyk $(cat output/tagged_image)
+       --fingerprint=$(cat output/fingerprint)
+       --name=security-scan
+       --scan-results=snyk.json
 
-pull-request-job:
-  stage: test-image
-  # needs: [ "build-job" ]
-  artifacts:
-    paths: [ output/ ]
-  script:
-    - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
-        --fingerprint=$(cat output/fingerprint)
-        --name=pull-request
-        --gitlab-token=$KOSLI_GITLAB_TOKEN
+# pull-request-job:
+#   stage: test-image
+#   needs: [ "build-job" ]
+#   artifacts:
+#     paths: [ output/ ]
+#   script:
+#     - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
+#         --fingerprint=$(cat output/fingerprint)
+#         --name=pull-request
+#         --gitlab-token=$KOSLI_GITLAB_TOKEN
 
 # sdlc-gate-job:
 #   stage: sdlc-gate
