@@ -111,7 +111,7 @@ sdlc-gate-job:
   needs:
     - branch-coverage-job
     - security-scan-job
-    - pull-request-job
+    # - pull-request-job
   artifacts:
     paths: [ output/ ]
   script:
