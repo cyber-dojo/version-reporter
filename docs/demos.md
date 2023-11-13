@@ -1,14 +1,25 @@
+# Gitlab Demo
+Lead time from commit to aws-prod is going to be ~10min
+
+If you do each one demo for each of the three test jobs it will take a long time!
+You could do all three in one commit
+  1) add snyk vulnerability
+  2) comment out tests
+  3) git push not in pull-request
+You could make a pre-recorded video and get JC to cut out the waiting?
+These would be great for social media...
+
 Here is a URL for a cyber-dojo practice session
-https://beta.cyber-dojo.org/kata/edit/9yAkDD
+https://cyber-dojo.org/kata/edit/TkQlGt
 Click the (i) button on the top bar (to the right of the ID==9yAkDD)
 This reveals 5 buttons.
 Then click the [versions] button.
 This will take you to:
-https://beta.cyber-dojo.org/version-reporter/index
+https://cyber-dojo.org/version-reporter/index
 This shows the git commit (+link) for all microservices (including version-reporter itself)
 
 
-# Fail deployment when a commit lowers code coverage
+# Fail deployment when a commit lowers branch coverage below 100%
 
 Go into the `test/server` directory and rename the
 file `ready_test.rb` to `ready_test.rb.off` and then commit
@@ -41,24 +52,11 @@ to
 and then commit and push.
 
 # Fail deployment when a pull request is not found for the change
-Do a commit that is not in a pull-request!
-WIP
+Do a commit and push outside of a pull-request!
 
 # Alert when a manual deployment is made
-WIP
+Mike is doing this.
 
 # Use the kosli assert artifact command as policy enforcement point
 See sdlc-gate-job: in .gitlab-ci.yml
 
-# Gitlab Demo
-
-Lead time from commit to aws-prod is going to be ~10min
-(or ~7mins if we don't deploy to aws-beta).
-
-If you do each one demo for each of the three test jobs it will take a long time!
-You could do all three in one commit
-  1) add snyk vulnerability
-  2) comment out tests
-  3) git push not in pull-request
-You could make a pre-recorded video and get JC to cut out the waiting?
-These would be great for social media...

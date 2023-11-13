@@ -1,23 +1,4 @@
 
-TODO: prod-deployment-job
-Needs env-vars for AWS_ACCESS_KEY_ID_PROD and AWS_SECRET_ACCESS_KEY_PROD
-Artem can provide these.
-
-TODO: snyk needs authenticated account.
-IIRC the one we are using for the server is from Sami's personal
-snyk account. That will be fine for now.
-
-TODO: pull-request-job
-Needs working gitlab-token. The one we tried gives 403 Forbidden.
-There is no information on the URL being forbidden but we assume
-it is from the Kosli CLI.
-
-TODO: approval-job
-$ kosli report approval ...
-How do we find the --oldest-commit value?
-
--------------------------------------------------------------------------
-
 TODO: Change environment descriptions.
 aws-beta == "The ECS cluster for staging cyber-dojo"
 aws-prod == "The ECS cluster for production cyber-dojo"
