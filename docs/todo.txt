@@ -1,4 +1,8 @@
 
+TODO: prod-deployment-job
+Needs env-vars for AWS_ACCESS_KEY_ID_PROD and AWS_SECRET_ACCESS_KEY_PROD
+Artem can provide these.
+
 TODO: snyk needs authenticated account.
 IIRC the one we are using for the server is from Sami's personal
 snyk account. That will be fine for now.
@@ -10,11 +14,9 @@ it is from the Kosli CLI.
 
 TODO: approval-job
 $ kosli report approval ...
-How do I find the --oldest-commit value?
+How do we find the --oldest-commit value?
 
-TODO: prod-deployment-job
-Needs env-vars for AWS_ACCESS_KEY_ID_PROD and AWS_SECRET_ACCESS_KEY_PROD
-Artem can provide these.
+-------------------------------------------------------------------------
 
 TODO: Change environment descriptions.
 aws-beta == "The ECS cluster for staging cyber-dojo"
