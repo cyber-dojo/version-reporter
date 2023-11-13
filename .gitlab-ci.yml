@@ -12,6 +12,18 @@ variables:
   KOSLI_FLOW: version-reporter
   DOCKER_TLS_CERTDIR: "/certs"
 
+.deployment-job:
+  stage: deploy-image
+  artifacts:
+    paths: [ output/ ]
+  script:
+    - kosli expect deployment $(cat output/tagged_image)
+        --fingerprint=$(cat output/fingerprint)
+        --description "Deployed to ${KOSLI_ENVIRONMENT_NAME} in Gitlab pipeline"
+        --environment ${KOSLI_ENVIRONMENT_NAME}
+    - export TF_VAR_TAGGED_IMAGE=$(cat output/tagged_image)
+    - cd deployment/terraform && tf.sh apply
+
 create-kosli-flow:
   stage: kosli-flow
   script:
@@ -96,20 +108,12 @@ sdlc-gate-job:
         --fingerprint=$(cat output/fingerprint)
 
 beta-deployment-job:
+  extends: .deployment-job
   needs: [ "sdlc-gate-job" ]
-  stage: deploy-image
-  artifacts:
-    paths: [ output/ ]
   variables:
     AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_BETA}
     AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_BETA}
-  script:
-    - kosli expect deployment $(cat output/tagged_image)
-        --fingerprint=$(cat output/fingerprint)
-        --description "Deployed to aws-beta in Gitlab pipeline"
-        --environment aws-beta
-    - export TF_VAR_TAGGED_IMAGE=$(cat output/tagged_image)
-    - cd deployment/terraform && tf.sh apply
+    KOSLI_ENVIRONMENT_NAME: aws-beta
 
 #approval-job:
 #  needs: [ "beta-deployment-job" ]
@@ -125,20 +129,12 @@ beta-deployment-job:
 #    #    --oldest-commit=?????
 
 prod-deployment-job:
+  extends: .deployment-job
   needs: [ "beta-deployment-job" ]
-  stage: deploy-image
-  artifacts:
-    paths: [ output/ ]
   variables:
     AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_PROD}
     AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_PROD}
-  script:
-    - kosli expect deployment $(cat output/tagged_image)
-        --fingerprint=$(cat output/fingerprint)
-        --description "Deployed to aws-prod in Gitlab pipeline"
-        --environment aws-prod
-    - export TF_VAR_TAGGED_IMAGE=$(cat output/tagged_image)
-    - cd deployment/terraform && tf.sh apply
+    KOSLI_ENVIRONMENT_NAME: aws-prod
 
 push-latest-image:
   needs: [ "prod-deployment-job" ]
