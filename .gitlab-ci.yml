@@ -12,6 +12,7 @@ stages:
   - beta
   - approval
   - production
+  - post-production
 
 variables:
   KOSLI_DRY_RUN: "False"
@@ -174,7 +175,7 @@ prod-deployment:
 
 update-git-tracking-branch:
   extends: [ .only-main ]
-  stage: production
+  stage: post-production
   needs: [ "prod-deployment" ]
   script:
     - git fetch origin production
@@ -188,8 +189,8 @@ update-git-tracking-branch:
 
 push-latest-image-to-public-registry:
   extends: [ .only-main ]
-  stage: production
-  needs: [ "update-git-tracking-branch" ]
+  stage: post-production
+  needs: [ "prod-deployment" ]
   services: [ "docker:24.0.5-dind" ]
   artifacts:
     paths: [ output/ ]
