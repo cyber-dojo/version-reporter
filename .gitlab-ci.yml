@@ -141,10 +141,6 @@ beta-deployment:
     - cd deployment/terraform && tf.sh apply
 
 approval:
-  # variables:
-  #   GIT_DEPTH: 1  # clone full history
-  # variables:
-  #   GIT_STRATEGY: clone
   extends: [ .only-main ]
   needs: [ "beta-deployment" ]
   stage: approval
@@ -153,7 +149,7 @@ approval:
   when: manual
   allow_failure: false
   script:
-    - git fetch origin production
+    - git fetch origin production # https://stackoverflow.com/questions/65686740/how-to-fetch-entire-repository-with-gitlab-ci-cd
     - git branch -a
     - git rev-parse origin/production
     - git rev-list origin/production..HEAD
@@ -190,6 +186,9 @@ update-git-tracking-branch:
     - git log --graph --full-history --all --color --date=short --pretty=format:"%Cred%x09%h %Creset%ad%Cblue%d %Creset %s %C(bold)(%an)%Creset" | head -n 30
     - git checkout production
     - git merge --ff-only ${CI_COMMIT_SHA}
+    - git config user.email "artem@kosli.com"
+    - git config user.name "ci-bot"
+    - git remote add gitlab_origin https://oauth2:$KOSLI_GITLAB_TOKEN@gitlab.com/cyber-dojo/version-reporter.git
     - git push origin production
 
 #push-latest-image-to-public-registry:
