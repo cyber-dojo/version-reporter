@@ -189,7 +189,7 @@ update-git-tracking-branch:
     - git config user.email "project_51960773_bot_30199361277f8228ac9a2b9bfeb562d8@noreply.gitlab.com"
     - git config user.name "project_51960773_bot_30199361277f8228ac9a2b9bfeb562d8"
     - git remote add gitlab_origin https://oauth2:$KOSLI_GITLAB_TOKEN@gitlab.com/cyber-dojo/version-reporter.git
-    - git push origin production
+    - git push gitlab_origin production
 
 #push-latest-image-to-public-registry:
 #  extends: [ .only-main ]
