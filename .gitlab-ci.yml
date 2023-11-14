@@ -122,6 +122,7 @@ beta-deployment:
     KOSLI_ENVIRONMENT_NAME: aws-beta
     ECR_REPO: 244531986313.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/version-reporter
   script:
+    - docker pull $(cat output/tagged_image)
     - docker tag $(cat output/tagged_image) ${ECR_REPO}:${CI_COMMIT_SHA:0:7}
     - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}
     - docker push ${ECR_REPO}:${CI_COMMIT_SHA:0:7}
@@ -163,6 +164,7 @@ prod-deployment:
     KOSLI_ENVIRONMENT_NAME: aws-prod
     ECR_REPO: 274425519734.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/version-reporter
   script:
+    - docker pull $(cat output/tagged_image)
     - docker tag $(cat output/tagged_image) ${ECR_REPO}:${CI_COMMIT_SHA:0:7}
     - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}
     - docker push ${ECR_REPO}:${CI_COMMIT_SHA:0:7}
