@@ -186,6 +186,7 @@ update-git-tracking-branch:
   needs: [ "prod-deployment" ]
   stage: production
   script:
+    - git fetch origin production
     - git log --graph --full-history --all --color --date=short --pretty=format:"%Cred%x09%h %Creset%ad%Cblue%d %Creset %s %C(bold)(%an)%Creset" | head -n 30
     - git checkout production
     - git merge --ff-only ${CI_COMMIT_SHA}
