@@ -138,7 +138,8 @@ approval:
   when: manual
   allow_failure: false
   script:
-    - git log --graph --full-history --all --color --date=short --pretty=format:"%Cred%x09%h %Creset%ad%Cblue%d %Creset %s %C(bold)(%an)%Creset" | head -n 30
+    - pwd
+    - git log --graph --full-history --all --date=short | head -n 30
     - kosli report approval $(cat output/tagged_image)
         --fingerprint=$(cat output/fingerprint)
         --description="Approved in Gitlab pipeline"
