@@ -28,6 +28,7 @@ start-kosli-trail:
         --template=artifact
         # --template=artifact,branch-coverage,security-scan,pull-request
 
+# Build and push the image to the Dockerhub and ECR (both beta and prod repositories)
 build:
   extends: [ .only-main ]
   stage: build-image
@@ -44,9 +45,15 @@ build:
     - docker push $TAGGED_IMAGE
     - kosli report artifact $TAGGED_IMAGE --artifact-type=docker
     - FINGERPRINT=$(kosli fingerprint $TAGGED_IMAGE --artifact-type=docker)
+    - export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_BETA} && export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_BETA}
+    - export ECR_REPO_BETA=244531986313.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/version-reporter
+    - docker tag $TAGGED_IMAGE ${ECR_REPO_BETA}:${CI_COMMIT_SHA:0:7}
+    - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}
+    - docker push ${ECR_REPO_BETA}:${CI_COMMIT_SHA:0:7}
     - mkdir output
     - echo $FINGERPRINT  > output/fingerprint
     - echo $TAGGED_IMAGE > output/tagged_image
+    - echo $ECR_REPO_BETA:${CI_COMMIT_SHA:0:7} > output/tagged_image_ecr_beta
 
 branch-coverage:
   extends: [ .only-main ]
