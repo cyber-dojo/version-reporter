@@ -146,6 +146,7 @@ approval:
         --fingerprint=$(cat output/fingerprint)
         --description="Approved in Gitlab pipeline"
         --oldest-commit=origin/production
+        --approver="${GITLAB_USER_NAME} <${GITLAB_USER_EMAIL}>"
 
 prod-deployment:
   extends: [ .only-main ]
