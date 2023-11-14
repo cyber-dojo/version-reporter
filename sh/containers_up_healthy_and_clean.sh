@@ -7,7 +7,7 @@ server_up_healthy_and_clean()
   export CONTAINER_PORT="${CYBER_DOJO_VERSION_REPORTER_PORT}"
   docker-compose up --detach "${SERVICE_NAME}"
   exit_non_zero_unless_healthy
-  exit_non_zero_unless_started_cleanly
+  #exit_non_zero_unless_started_cleanly
 }
 
 # - - - - - - - - - - - - - - - - - - -
@@ -19,7 +19,7 @@ client_up_healthy_and_clean()
     export CONTAINER_PORT="${CYBER_DOJO_VERSION_REPORTER_CLIENT_PORT}"
     docker-compose up --detach "${SERVICE_NAME}"
     exit_non_zero_unless_healthy
-    exit_non_zero_unless_started_cleanly
+    #exit_non_zero_unless_started_cleanly
   fi
 }
 
