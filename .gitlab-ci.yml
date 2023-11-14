@@ -58,11 +58,11 @@ branch-coverage:
     - source ./sh/run_tests_with_coverage.sh
     - if run_tests_with_coverage; then KOSLI_COMPLIANT=true; else KOSLI_COMPLIANT=false; fi
     - kosli report evidence artifact generic $(cat output/tagged_image)
-          --fingerprint=$(cat output/fingerprint)
-          --compliant=$KOSLI_COMPLIANT
-          --description="server & client branch-coverage reports"
-          --name=branch-coverage
-          --user-data=./test/evidence.json
+        --fingerprint=$(cat output/fingerprint)
+        --compliant=$KOSLI_COMPLIANT
+        --description="server & client branch-coverage reports"
+        --name=branch-coverage
+        --user-data=./test/evidence.json
 
 security-scan:
   extends: [ .only-main ]
@@ -119,9 +119,9 @@ beta-deployment:
     KOSLI_ENVIRONMENT_NAME: aws-beta
   script:
     - kosli expect deployment $(cat output/tagged_image)
-      --fingerprint=$(cat output/fingerprint)
-      --description "Deployed to ${KOSLI_ENVIRONMENT_NAME} in Gitlab pipeline"
-      --environment ${KOSLI_ENVIRONMENT_NAME}
+        --fingerprint=$(cat output/fingerprint)
+        --description "Deployed to ${KOSLI_ENVIRONMENT_NAME} in Gitlab pipeline"
+        --environment ${KOSLI_ENVIRONMENT_NAME}
     - export TF_VAR_TAGGED_IMAGE=$(cat output/tagged_image)
     - cd deployment/terraform && tf.sh apply
 
@@ -153,9 +153,9 @@ prod-deployment:
     KOSLI_ENVIRONMENT_NAME: aws-prod
   script:
     - kosli expect deployment $(cat output/tagged_image)
-      --fingerprint=$(cat output/fingerprint)
-      --description "Deployed to ${KOSLI_ENVIRONMENT_NAME} in Gitlab pipeline"
-      --environment ${KOSLI_ENVIRONMENT_NAME}
+        --fingerprint=$(cat output/fingerprint)
+        --description "Deployed to ${KOSLI_ENVIRONMENT_NAME} in Gitlab pipeline"
+        --environment ${KOSLI_ENVIRONMENT_NAME}
     - export TF_VAR_TAGGED_IMAGE=$(cat output/tagged_image)
     - cd deployment/terraform && tf.sh apply
 
