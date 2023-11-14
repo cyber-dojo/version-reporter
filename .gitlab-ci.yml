@@ -143,6 +143,8 @@ beta-deployment:
 approval:
   # variables:
   #   GIT_DEPTH: 1  # clone full history
+  variables:
+    GIT_STRATEGY: clone
   extends: [ .only-main ]
   needs: [ "beta-deployment" ]
   stage: approval
