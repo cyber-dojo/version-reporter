@@ -186,8 +186,8 @@ update-git-tracking-branch:
     - git log --graph --full-history --all --color --date=short --pretty=format:"%Cred%x09%h %Creset%ad%Cblue%d %Creset %s %C(bold)(%an)%Creset" | head -n 30
     - git checkout production
     - git merge --ff-only ${CI_COMMIT_SHA}
-    - git config user.email "artem@kosli.com"
-    - git config user.name "ci-bot"
+    - git config user.email "project_51960773_bot_30199361277f8228ac9a2b9bfeb562d8@noreply.gitlab.com"
+    - git config user.name "project_51960773_bot_30199361277f8228ac9a2b9bfeb562d8"
     - git remote add gitlab_origin https://oauth2:$KOSLI_GITLAB_TOKEN@gitlab.com/cyber-dojo/version-reporter.git
     - git push origin production
 
