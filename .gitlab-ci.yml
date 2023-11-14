@@ -113,6 +113,7 @@ sdlc-gate:
 beta-deployment:
   extends: [ .only-main ]
   needs: [ "sdlc-gate" ]
+  services: [ "docker:24.0.5-dind" ]
   stage: beta
   artifacts:
     paths: [ output/ ]
@@ -155,6 +156,7 @@ approval:
 prod-deployment:
   extends: [ .only-main ]
   needs: [ "approval" ]
+  services: [ "docker:24.0.5-dind" ]
   stage: production
   artifacts:
     paths: [ output/ ]
