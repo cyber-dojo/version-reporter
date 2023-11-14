@@ -140,25 +140,27 @@ beta-deployment:
     - export TF_VAR_TAGGED_IMAGE=$(cat output/tagged_image_ecr_beta)
     - cd deployment/terraform && tf.sh apply
 
-# approval:
-#   variables:
-#     GIT_DEPTH: 0  # clone full history
-#   extends: [ .only-main ]
-#   needs: [ "beta-deployment" ]
-#   stage: approval
-#   artifacts:
-#     paths: [ output/ ]
-#   when: manual
-#   allow_failure: false
-#   script:
-#     - kosli report approval $(cat output/tagged_image)
-#         --fingerprint=$(cat output/fingerprint)
-#         --description="Approved in Gitlab pipeline"
-#         --oldest-commit=origin/production
+approval:
+  # variables:
+  #   GIT_DEPTH: 1  # clone full history
+  extends: [ .only-main ]
+  needs: [ "beta-deployment" ]
+  stage: approval
+  artifacts:
+    paths: [ output/ ]
+  when: manual
+  allow_failure: false
+  script:
+    - git show-ref --heads
+    - git log --graph --full-history --all --color --date=short --pretty=format:"%Cred%x09%h %Creset%ad%Cblue%d %Creset %s %C(bold)(%an)%Creset" | head -n 30
+    - kosli report approval $(cat output/tagged_image)
+        --fingerprint=$(cat output/fingerprint)
+        --description="Approved in Gitlab pipeline"
+        --oldest-commit=origin/production
 
 prod-deployment:
   extends: [ .only-main ]
-  # needs: [ "approval" ]
+  needs: [ "approval" ]
   stage: production
   artifacts:
     paths: [ output/ ]
@@ -174,16 +176,15 @@ prod-deployment:
     - export TF_VAR_TAGGED_IMAGE=$(cat output/tagged_image_ecr_prod)
     - cd deployment/terraform && tf.sh apply
 
-# update-git-tracking-branch:
-#   extends: [ .only-main ]
-#   needs: [ "prod-deployment" ]
-#   stage: production
-#   script:
-#     - git fetch --all
-#     - git log --graph --full-history --all --color --date=short --pretty=format:"%Cred%x09%h %Creset%ad%Cblue%d %Creset %s %C(bold)(%an)%Creset" | head -n 30
-#     - git checkout --track origin/production
-#     - git merge --ff-only ${CI_COMMIT_SHA}
-#     - git push origin production
+update-git-tracking-branch:
+  extends: [ .only-main ]
+  needs: [ "prod-deployment" ]
+  stage: production
+  script:
+    - git log --graph --full-history --all --color --date=short --pretty=format:"%Cred%x09%h %Creset%ad%Cblue%d %Creset %s %C(bold)(%an)%Creset" | head -n 30
+    - git checkout --track origin/production
+    - git merge --ff-only ${CI_COMMIT_SHA}
+    - git push origin production
 
 #push-latest-image-to-public-registry:
 #  extends: [ .only-main ]
