@@ -143,14 +143,10 @@ approval:
   allow_failure: false
   script:
     - git fetch origin production # https://stackoverflow.com/questions/65686740/how-to-fetch-entire-repository-with-gitlab-ci-cd
-    - git branch -a
-    - git rev-parse origin/production
-    - git rev-list origin/production..HEAD
     - kosli report approval $(cat output/tagged_image)
         --fingerprint=$(cat output/fingerprint)
         --description="Approved in Gitlab pipeline"
         --oldest-commit=origin/production
-        --debug
 
 prod-deployment:
   extends: [ .only-main ]
