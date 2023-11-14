@@ -161,7 +161,7 @@ prod-deployment:
 
 update-git-tracking-branch:
   extends: [ .only-main ]
-  needs: [ "prod-deployment" ]
+  needs: [ "production" ]
   stage: deploy-image
   script:
     - git log --graph --full-history --all --color --date=short --pretty=format:"%Cred%x09%h %Creset%ad%Cblue%d %Creset %s %C(bold)(%an)%Creset" | head -n 30
