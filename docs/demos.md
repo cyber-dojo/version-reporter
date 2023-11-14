@@ -60,3 +60,6 @@ Mike is doing this.
 # Use the kosli assert artifact command as policy enforcement point
 See sdlc-gate-job: in .gitlab-ci.yml
 
+
+We also should keep in mind Dockerhub limits. 100 pulls per day is not so much. 
+So if all pulls comes from the same ip we are able to run this pipeline only 50 times per day.
