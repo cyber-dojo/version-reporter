@@ -20,7 +20,7 @@ variables:
   DOCKER_TLS_CERTDIR: "/certs"
 
 start-kosli-trail:
-  extends: [.only-main]
+  extends: [ .only-main ]
   stage: kosli-trail
   script:
     - kosli create flow $KOSLI_FLOW
@@ -28,7 +28,7 @@ start-kosli-trail:
         --template=artifact,branch-coverage,security-scan,pull-request
 
 build:
-  extends: [.only-main]
+  extends: [ .only-main ]
   stage: build-image
   needs: [ "start-kosli-trail" ]
   services: [ "docker:24.0.5-dind" ]
@@ -48,7 +48,7 @@ build:
     - echo $TAGGED_IMAGE > output/tagged_image
 
 branch-coverage:
-  extends: [.only-main]
+  extends: [ .only-main ]
   stage: test-image
   needs: [ "build" ]
   services: [ "docker:24.0.5-dind" ]
@@ -65,7 +65,7 @@ branch-coverage:
           --user-data=./test/evidence.json
 
 security-scan:
-  extends: [.only-main]
+  extends: [ .only-main ]
   image: registry.gitlab.com/cyber-dojo/version-reporter:v1-ubuntu
   stage: test-image
   needs: [ "build" ]
@@ -83,7 +83,7 @@ security-scan:
         --scan-results=snyk.json
 
 pull-request:
-  extends: [.only-main]
+  extends: [ .only-main ]
   stage: test-image
   needs: [ "build" ]
   artifacts:
@@ -95,7 +95,7 @@ pull-request:
         --gitlab-token=$KOSLI_GITLAB_TOKEN
 
 sdlc-gate:
-  extends: [.only-main]
+  extends: [ .only-main ]
   stage: sdlc-gate
   needs:
     - branch-coverage
@@ -108,7 +108,7 @@ sdlc-gate:
         --fingerprint=$(cat output/fingerprint)
 
 beta-deployment:
-  extends: [.only-main]
+  extends: [ .only-main ]
   needs: [ "sdlc-gate" ]
   stage: beta
   artifacts:
@@ -128,7 +128,7 @@ beta-deployment:
 approval:
   variables:
     GIT_DEPTH: 0  # clone full history
-  extends: [.only-main]
+  extends: [ .only-main ]
   needs: [ "beta-deployment" ]
   stage: approval
   artifacts:
@@ -142,7 +142,7 @@ approval:
         --oldest-commit=origin/production
 
 prod-deployment:
-  extends: [.only-main]
+  extends: [ .only-main ]
   needs: [ "approval" ]
   stage: production
   artifacts:
@@ -160,7 +160,7 @@ prod-deployment:
     - cd deployment/terraform && tf.sh apply
 
 #update-git-tracking-branch:
-#  extends: [.only-main]
+#  extends: [ .only-main ]
 #  needs: [ "prod-deployment" ]
 #  stage: deploy-image
 #  script:
@@ -170,7 +170,7 @@ prod-deployment:
 #    - git push origin production
 
 #push-latest-image-to-public-registry:
-#  extends: [.only-main]
+#  extends: [ .only-main ]
 #  needs: [ "update-git-tracking-branch" ]
 #  services: [ "docker:24.0.5-dind" ]
 #  stage: deploy-image
