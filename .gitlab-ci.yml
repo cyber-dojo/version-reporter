@@ -111,9 +111,9 @@ sdlc-gate:
 
 beta-deployment:
   extends: [ .only-main ]
+  stage: beta
   needs: [ "sdlc-gate" ]
   services: [ "docker:24.0.5-dind" ]
-  stage: beta
   artifacts:
     paths: [ output/ ]
   variables:
@@ -135,8 +135,8 @@ beta-deployment:
 
 approval:
   extends: [ .only-main ]
-  needs: [ "beta-deployment" ]
   stage: approval
+  needs: [ "beta-deployment" ]
   artifacts:
     paths: [ output/ ]
   when: manual
@@ -150,9 +150,9 @@ approval:
 
 prod-deployment:
   extends: [ .only-main ]
+  stage: production
   needs: [ "approval" ]
   services: [ "docker:24.0.5-dind" ]
-  stage: production
   artifacts:
     paths: [ output/ ]
   variables:
@@ -174,8 +174,8 @@ prod-deployment:
 
 update-git-tracking-branch:
   extends: [ .only-main ]
-  needs: [ "prod-deployment" ]
   stage: production
+  needs: [ "prod-deployment" ]
   script:
     - git fetch origin production
     - git log --graph --full-history --all --color --date=short --pretty=format:"%Cred%x09%h %Creset%ad%Cblue%d %Creset %s %C(bold)(%an)%Creset" | head -n 30
@@ -188,9 +188,9 @@ update-git-tracking-branch:
 
 push-latest-image-to-public-registry:
   extends: [ .only-main ]
+  stage: deploy-image
   needs: [ "update-git-tracking-branch" ]
   services: [ "docker:24.0.5-dind" ]
-  stage: deploy-image
   artifacts:
     paths: [ output/ ]
   script:
