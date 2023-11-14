@@ -28,7 +28,6 @@ start-kosli-trail:
         --template=artifact
         # --template=artifact,branch-coverage,security-scan,pull-request
 
-# Build and push the image to the Dockerhub and ECR (both beta and prod repositories)
 build:
   extends: [ .only-main ]
   stage: build-image
