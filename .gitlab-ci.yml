@@ -188,7 +188,7 @@ update-git-tracking-branch:
 
 push-latest-image-to-public-registry:
   extends: [ .only-main ]
-  stage: deploy-image
+  stage: production
   needs: [ "update-git-tracking-branch" ]
   services: [ "docker:24.0.5-dind" ]
   artifacts:
