@@ -50,10 +50,16 @@ build:
     - docker tag $TAGGED_IMAGE ${ECR_REPO_BETA}:${CI_COMMIT_SHA:0:7}
     - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_REPO_BETA}
     - docker push ${ECR_REPO_BETA}:${CI_COMMIT_SHA:0:7}
+    - export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_PROD} && export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_PROD}
+    - export ECR_REPO_PROD=274425519734.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/version-reporter
+    - docker tag $TAGGED_IMAGE ${ECR_REPO_PROD}:${CI_COMMIT_SHA:0:7}
+    - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_REPO_PROD}
+    - docker push ${ECR_REPO_PROD}:${CI_COMMIT_SHA:0:7}
     - mkdir output
     - echo $FINGERPRINT  > output/fingerprint
     - echo $TAGGED_IMAGE > output/tagged_image
     - echo ${ECR_REPO_BETA}:${CI_COMMIT_SHA:0:7} > output/tagged_image_ecr_beta
+    - echo ${ECR_REPO_PROD}:${CI_COMMIT_SHA:0:7} > output/tagged_image_ecr_prod
 
 branch-coverage:
   extends: [ .only-main ]
@@ -65,7 +71,7 @@ branch-coverage:
   script:
     - source ./sh/run_tests_with_coverage.sh
     # - if run_tests_with_coverage; then KOSLI_COMPLIANT=true; else KOSLI_COMPLIANT=false; fi
-    # - kosli report evidence artifact generic $(cat output/tagged_image)
+    # - kosli report evidence artifact generic $(cat output/tagged_image_ecr_beta)
     #     --fingerprint=$(cat output/fingerprint)
     #     --compliant=$KOSLI_COMPLIANT
     #     --description="server & client branch-coverage reports"
@@ -81,11 +87,11 @@ security-scan:
     paths: [ output/ ]
   script:
     - set +e
-    # - snyk container test $(cat output/tagged_image)
+    # - snyk container test $(cat output/tagged_image_ecr_beta)
     #     --file=Dockerfile
     #     --json-file-output=snyk.json
     #     --policy-path=.snyk
-    # - kosli report evidence artifact snyk $(cat output/tagged_image)
+    # - kosli report evidence artifact snyk $(cat output/tagged_image_ecr_beta)
     #     --fingerprint=$(cat output/fingerprint)
     #     --name=security-scan
     #     --scan-results=snyk.json
@@ -98,7 +104,7 @@ pull-request:
     paths: [ output/ ]
   script:
     - pwd
-    # - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
+    # - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image_ecr_beta)
     #     --fingerprint=$(cat output/fingerprint)
     #     --name=pull-request
     #     --gitlab-token=$KOSLI_GITLAB_TOKEN
@@ -113,7 +119,7 @@ sdlc-gate:
   artifacts:
     paths: [ output/ ]
   script:
-    - kosli assert artifact $(cat output/tagged_image)
+    - kosli assert artifact $(cat output/tagged_image_ecr_beta)
         --fingerprint=$(cat output/fingerprint)
 
 beta-deployment:
@@ -127,32 +133,32 @@ beta-deployment:
     AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_BETA}
     KOSLI_ENVIRONMENT_NAME: aws-beta
   script:
-    - kosli expect deployment $(cat output/tagged_image)
+    - kosli expect deployment $(cat output/tagged_image_ecr_beta)
         --fingerprint=$(cat output/fingerprint)
         --description "Deployed to ${KOSLI_ENVIRONMENT_NAME} in Gitlab pipeline"
         --environment ${KOSLI_ENVIRONMENT_NAME}
-    - export TF_VAR_TAGGED_IMAGE=$(cat output/tagged_image)
+    - export TF_VAR_TAGGED_IMAGE=$(cat output/tagged_image_ecr_beta)
     - cd deployment/terraform && tf.sh apply
 
-approval:
-  variables:
-    GIT_DEPTH: 0  # clone full history
-  extends: [ .only-main ]
-  needs: [ "beta-deployment" ]
-  stage: approval
-  artifacts:
-    paths: [ output/ ]
-  when: manual
-  allow_failure: false
-  script:
-    - kosli report approval $(cat output/tagged_image)
-        --fingerprint=$(cat output/fingerprint)
-        --description="Approved in Gitlab pipeline"
-        --oldest-commit=origin/production
+# approval:
+#   variables:
+#     GIT_DEPTH: 0  # clone full history
+#   extends: [ .only-main ]
+#   needs: [ "beta-deployment" ]
+#   stage: approval
+#   artifacts:
+#     paths: [ output/ ]
+#   when: manual
+#   allow_failure: false
+#   script:
+#     - kosli report approval $(cat output/tagged_image)
+#         --fingerprint=$(cat output/fingerprint)
+#         --description="Approved in Gitlab pipeline"
+#         --oldest-commit=origin/production
 
 prod-deployment:
   extends: [ .only-main ]
-  needs: [ "approval" ]
+  # needs: [ "approval" ]
   stage: production
   artifacts:
     paths: [ output/ ]
@@ -161,23 +167,23 @@ prod-deployment:
     AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_PROD}
     KOSLI_ENVIRONMENT_NAME: aws-prod
   script:
-    - kosli expect deployment $(cat output/tagged_image)
+    - kosli expect deployment $(cat output/tagged_image_ecr_prod)
         --fingerprint=$(cat output/fingerprint)
         --description "Deployed to ${KOSLI_ENVIRONMENT_NAME} in Gitlab pipeline"
         --environment ${KOSLI_ENVIRONMENT_NAME}
-    - export TF_VAR_TAGGED_IMAGE=$(cat output/tagged_image)
+    - export TF_VAR_TAGGED_IMAGE=$(cat output/tagged_image_ecr_prod)
     - cd deployment/terraform && tf.sh apply
 
-update-git-tracking-branch:
-  extends: [ .only-main ]
-  needs: [ "prod-deployment" ]
-  stage: production
-  script:
-    - git fetch --all
-    - git log --graph --full-history --all --color --date=short --pretty=format:"%Cred%x09%h %Creset%ad%Cblue%d %Creset %s %C(bold)(%an)%Creset" | head -n 30
-    - git checkout --track origin/production
-    - git merge --ff-only ${CI_COMMIT_SHA}
-    - git push origin production
+# update-git-tracking-branch:
+#   extends: [ .only-main ]
+#   needs: [ "prod-deployment" ]
+#   stage: production
+#   script:
+#     - git fetch --all
+#     - git log --graph --full-history --all --color --date=short --pretty=format:"%Cred%x09%h %Creset%ad%Cblue%d %Creset %s %C(bold)(%an)%Creset" | head -n 30
+#     - git checkout --track origin/production
+#     - git merge --ff-only ${CI_COMMIT_SHA}
+#     - git push origin production
 
 #push-latest-image-to-public-registry:
 #  extends: [ .only-main ]
