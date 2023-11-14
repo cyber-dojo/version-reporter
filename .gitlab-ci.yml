@@ -191,15 +191,15 @@ update-git-tracking-branch:
     - git remote add gitlab_origin https://oauth2:$KOSLI_GITLAB_TOKEN@gitlab.com/cyber-dojo/version-reporter.git
     - git push gitlab_origin production
 
-#push-latest-image-to-public-registry:
-#  extends: [ .only-main ]
-#  needs: [ "update-git-tracking-branch" ]
-#  services: [ "docker:24.0.5-dind" ]
-#  stage: deploy-image
-#  artifacts:
-#    paths: [ output/ ]
-#  script:
-#    - docker pull $(cat output/tagged_image)
-#    - docker tag $(cat output/tagged_image) cyberdojo/version-reporter:latest
-#    - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
-#    - docker push cyberdojo/version-reporter:latest
+push-latest-image-to-public-registry:
+  extends: [ .only-main ]
+  needs: [ "update-git-tracking-branch" ]
+  services: [ "docker:24.0.5-dind" ]
+  stage: deploy-image
+  artifacts:
+    paths: [ output/ ]
+  script:
+    - docker pull $(cat output/tagged_image)
+    - docker tag $(cat output/tagged_image) cyberdojo/version-reporter:latest
+    - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
+    - docker push cyberdojo/version-reporter:latest
