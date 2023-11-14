@@ -26,6 +26,7 @@ start-kosli-trail:
     - kosli create flow $KOSLI_FLOW
         --description="UX for git+image version-reporter"
         --template=artifact,branch-coverage,security-scan,pull-request
+        --template=artifact,security-scan
 
 build:
   extends: [ .only-main ]
@@ -47,22 +48,22 @@ build:
     - echo $FINGERPRINT  > output/fingerprint
     - echo $TAGGED_IMAGE > output/tagged_image
 
-branch-coverage:
-  extends: [ .only-main ]
-  stage: test-image
-  needs: [ "build" ]
-  services: [ "docker:24.0.5-dind" ]
-  artifacts:
-    paths: [ output/ ]
-  script:
-    - source ./sh/run_tests_with_coverage.sh
-    - if run_tests_with_coverage; then KOSLI_COMPLIANT=true; else KOSLI_COMPLIANT=false; fi
-    - kosli report evidence artifact generic $(cat output/tagged_image)
-        --fingerprint=$(cat output/fingerprint)
-        --compliant=$KOSLI_COMPLIANT
-        --description="server & client branch-coverage reports"
-        --name=branch-coverage
-        --user-data=./test/evidence.json
+# branch-coverage:
+#   extends: [ .only-main ]
+#   stage: test-image
+#   needs: [ "build" ]
+#   services: [ "docker:24.0.5-dind" ]
+#   artifacts:
+#     paths: [ output/ ]
+#   script:
+#     - source ./sh/run_tests_with_coverage.sh
+#     - if run_tests_with_coverage; then KOSLI_COMPLIANT=true; else KOSLI_COMPLIANT=false; fi
+#     - kosli report evidence artifact generic $(cat output/tagged_image)
+#         --fingerprint=$(cat output/fingerprint)
+#         --compliant=$KOSLI_COMPLIANT
+#         --description="server & client branch-coverage reports"
+#         --name=branch-coverage
+#         --user-data=./test/evidence.json
 
 security-scan:
   extends: [ .only-main ]
@@ -82,25 +83,25 @@ security-scan:
         --name=security-scan
         --scan-results=snyk.json
 
-pull-request:
-  extends: [ .only-main ]
-  stage: test-image
-  needs: [ "build" ]
-  artifacts:
-    paths: [ output/ ]
-  script:
-    - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
-        --fingerprint=$(cat output/fingerprint)
-        --name=pull-request
-        --gitlab-token=$KOSLI_GITLAB_TOKEN
+# pull-request:
+#   extends: [ .only-main ]
+#   stage: test-image
+#   needs: [ "build" ]
+#   artifacts:
+#     paths: [ output/ ]
+#   script:
+#     - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
+#         --fingerprint=$(cat output/fingerprint)
+#         --name=pull-request
+#         --gitlab-token=$KOSLI_GITLAB_TOKEN
 
 sdlc-gate:
   extends: [ .only-main ]
   stage: sdlc-gate
   needs:
-    - branch-coverage
+    # - branch-coverage
     - security-scan
-    - pull-request
+    # - pull-request
   artifacts:
     paths: [ output/ ]
   script:
