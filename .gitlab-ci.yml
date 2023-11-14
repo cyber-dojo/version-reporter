@@ -174,7 +174,7 @@ prod-deployment:
         --fingerprint=$(cat output/fingerprint)
         --description "Deployed to ${KOSLI_ENVIRONMENT_NAME} in Gitlab pipeline"
         --environment ${KOSLI_ENVIRONMENT_NAME}
-    - export TF_VAR_TAGGED_IMAGE=$(cat output/tagged_image)
+    - export TF_VAR_TAGGED_IMAGE=${ECR_REPO}:${CI_COMMIT_SHA:0:7}
     - cd deployment/terraform && tf.sh apply
 
 update-git-tracking-branch:
