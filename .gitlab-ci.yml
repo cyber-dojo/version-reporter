@@ -25,8 +25,8 @@ start-kosli-trail:
   script:
     - kosli create flow $KOSLI_FLOW
         --description="UX for git+image version-reporter"
-        # --template=artifact,branch-coverage,security-scan,pull-request
         --template=artifact,security-scan
+        # --template=artifact,bgranch-coverage,security-scan,pull-request
 
 build:
   extends: [ .only-main ]
