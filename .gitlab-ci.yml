@@ -154,7 +154,9 @@ approval:
   allow_failure: false
   script:
     - git fetch origin production
+    - git branch -a
     - git rev-parse origin/production
+    - git rev-list origin/production..HEAD
     - kosli report approval $(cat output/tagged_image)
         --fingerprint=$(cat output/fingerprint)
         --description="Approved in Gitlab pipeline"
