@@ -71,7 +71,7 @@ branch-coverage:
   script:
     - source ./sh/run_tests_with_coverage.sh
     # - if run_tests_with_coverage; then KOSLI_COMPLIANT=true; else KOSLI_COMPLIANT=false; fi
-    # - kosli report evidence artifact generic $(cat output/tagged_image_ecr_beta)
+    # - kosli report evidence artifact generic $(cat output/tagged_image)
     #     --fingerprint=$(cat output/fingerprint)
     #     --compliant=$KOSLI_COMPLIANT
     #     --description="server & client branch-coverage reports"
@@ -87,11 +87,11 @@ security-scan:
     paths: [ output/ ]
   script:
     - set +e
-    # - snyk container test $(cat output/tagged_image_ecr_beta)
+    # - snyk container test $(cat output/tagged_image)
     #     --file=Dockerfile
     #     --json-file-output=snyk.json
     #     --policy-path=.snyk
-    # - kosli report evidence artifact snyk $(cat output/tagged_image_ecr_beta)
+    # - kosli report evidence artifact snyk $(cat output/tagged_image)
     #     --fingerprint=$(cat output/fingerprint)
     #     --name=security-scan
     #     --scan-results=snyk.json
@@ -104,7 +104,7 @@ pull-request:
     paths: [ output/ ]
   script:
     - pwd
-    # - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image_ecr_beta)
+    # - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
     #     --fingerprint=$(cat output/fingerprint)
     #     --name=pull-request
     #     --gitlab-token=$KOSLI_GITLAB_TOKEN
@@ -119,7 +119,7 @@ sdlc-gate:
   artifacts:
     paths: [ output/ ]
   script:
-    - kosli assert artifact $(cat output/tagged_image_ecr_beta)
+    - kosli assert artifact $(cat output/tagged_image)
         --fingerprint=$(cat output/fingerprint)
 
 beta-deployment:
@@ -133,7 +133,7 @@ beta-deployment:
     AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_BETA}
     KOSLI_ENVIRONMENT_NAME: aws-beta
   script:
-    - kosli expect deployment $(cat output/tagged_image_ecr_beta)
+    - kosli expect deployment $(cat output/tagged_image)
         --fingerprint=$(cat output/fingerprint)
         --description "Deployed to ${KOSLI_ENVIRONMENT_NAME} in Gitlab pipeline"
         --environment ${KOSLI_ENVIRONMENT_NAME}
@@ -167,7 +167,7 @@ prod-deployment:
     AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_PROD}
     KOSLI_ENVIRONMENT_NAME: aws-prod
   script:
-    - kosli expect deployment $(cat output/tagged_image_ecr_prod)
+    - kosli expect deployment $(cat output/tagged_image)
         --fingerprint=$(cat output/fingerprint)
         --description "Deployed to ${KOSLI_ENVIRONMENT_NAME} in Gitlab pipeline"
         --environment ${KOSLI_ENVIRONMENT_NAME}
