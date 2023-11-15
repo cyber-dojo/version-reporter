@@ -1,8 +1,4 @@
 
-# TODO: Fix external user in UX for Approval
-This will need CLI 2.6.14 in the main runner image
-created from Dockerfile.base
-
 # TODO: Change environment descriptions.
 - aws-beta == "The ECS cluster for staging cyber-dojo"
 - aws-prod == "The ECS cluster for production cyber-dojo"
