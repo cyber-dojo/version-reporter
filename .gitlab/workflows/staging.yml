@@ -25,9 +25,10 @@ start-kosli-trail:
   extends: [ .only-main ]
   stage: kosli-trail
   script:
-    - kosli create flow $KOSLI_FLOW
+    - kosli create flow ${KOSLI_FLOW}
         --description="UX for git+image version-reporter"
         --template=artifact,branch-coverage,security-scan,pull-request
+        --debug
 
 wait-for-image:
   extends: [ .only-main ]
@@ -39,11 +40,11 @@ wait-for-image:
   script:
     - ./sh/wait_for_image.sh
     - TAGGED_IMAGE=cyberdojo/version-reporter:${CI_COMMIT_SHA:0:7}
-    - kosli report artifact $TAGGED_IMAGE --artifact-type=docker
-    - FINGERPRINT=$(kosli fingerprint $TAGGED_IMAGE --artifact-type=docker)
+    - kosli report artifact ${TAGGED_IMAGE} --artifact-type=docker
+    - FINGERPRINT=$(kosli fingerprint ${TAGGED_IMAGE} --artifact-type=docker)
     - mkdir output
-    - echo $FINGERPRINT  > output/fingerprint
-    - echo $TAGGED_IMAGE > output/tagged_image
+    - echo ${FINGERPRINT}  > output/fingerprint
+    - echo ${TAGGED_IMAGE} > output/tagged_image
 
 branch-coverage:
   extends: [ .only-main ]
@@ -57,7 +58,7 @@ branch-coverage:
     - if run_tests_with_coverage; then KOSLI_COMPLIANT=true; else KOSLI_COMPLIANT=false; fi
     - kosli report evidence artifact generic $(cat output/tagged_image)
         --fingerprint=$(cat output/fingerprint)
-        --compliant=$KOSLI_COMPLIANT
+        --compliant=${KOSLI_COMPLIANT}
         --description="server & client branch-coverage reports"
         --name=branch-coverage
         --user-data=./test/evidence.json
@@ -90,7 +91,7 @@ pull-request:
     - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
         --fingerprint=$(cat output/fingerprint)
         --name=pull-request
-        --gitlab-token=$KOSLI_GITLAB_TOKEN
+        --gitlab-token=${KOSLI_GITLAB_TOKEN}
 
 sdlc-gate:
   extends: [ .only-main ]

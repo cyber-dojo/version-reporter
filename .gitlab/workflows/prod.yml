@@ -25,7 +25,7 @@ start-kosli-trail:
   extends: [ .only-main ]
   stage: kosli-trail
   script:
-    - kosli create flow $KOSLI_FLOW
+    - kosli create flow ${KOSLI_FLOW}
         --description="UX for git+image version-reporter"
         --template=artifact,branch-coverage,security-scan,pull-request
 
@@ -39,15 +39,15 @@ build:
   script:
     - source ./sh/echo_versioner_env_vars.sh
     - export $(echo_versioner_env_vars)
-    - docker-compose build --build-arg COMMIT_SHA=$CI_COMMIT_SHA
+    - docker-compose build --build-arg COMMIT_SHA=${CI_COMMIT_SHA}
     - TAGGED_IMAGE=cyberdojo/version-reporter:${CI_COMMIT_SHA:0:7}
     - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
-    - docker push $TAGGED_IMAGE
-    - kosli report artifact $TAGGED_IMAGE --artifact-type=docker
-    - FINGERPRINT=$(kosli fingerprint $TAGGED_IMAGE --artifact-type=docker)
+    - docker push ${TAGGED_IMAGE}
+    - kosli report artifact ${TAGGED_IMAGE} --artifact-type=docker
+    - FINGERPRINT=$(kosli fingerprint ${TAGGED_IMAGE} --artifact-type=docker)
     - mkdir output
-    - echo $FINGERPRINT  > output/fingerprint
-    - echo $TAGGED_IMAGE > output/tagged_image
+    - echo ${FINGERPRINT}  > output/fingerprint
+    - echo ${TAGGED_IMAGE} > output/tagged_image
 
 branch-coverage:
   extends: [ .only-main ]
@@ -61,7 +61,7 @@ branch-coverage:
     - if run_tests_with_coverage; then KOSLI_COMPLIANT=true; else KOSLI_COMPLIANT=false; fi
     - kosli report evidence artifact generic $(cat output/tagged_image)
         --fingerprint=$(cat output/fingerprint)
-        --compliant=$KOSLI_COMPLIANT
+        --compliant=${KOSLI_COMPLIANT}
         --description="server & client branch-coverage reports"
         --name=branch-coverage
         --user-data=./test/evidence.json
@@ -94,7 +94,7 @@ pull-request:
     - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
         --fingerprint=$(cat output/fingerprint)
         --name=pull-request
-        --gitlab-token=$KOSLI_GITLAB_TOKEN
+        --gitlab-token=${KOSLI_GITLAB_TOKEN}
 
 sdlc-gate:
   extends: [ .only-main ]
@@ -184,7 +184,7 @@ update-git-tracking-branch:
     - git merge --ff-only ${CI_COMMIT_SHA}
     - git config user.email "project_51960773_bot_30199361277f8228ac9a2b9bfeb562d8@noreply.gitlab.com"
     - git config user.name "project_51960773_bot_30199361277f8228ac9a2b9bfeb562d8"
-    - git remote add gitlab_origin https://oauth2:$KOSLI_GITLAB_TOKEN@gitlab.com/cyber-dojo/version-reporter.git
+    - git remote add gitlab_origin https://oauth2:${KOSLI_GITLAB_TOKEN}@gitlab.com/cyber-dojo/version-reporter.git
     - git push gitlab_origin production
 
 push-latest-image-to-public-registry:

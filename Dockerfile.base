@@ -3,9 +3,9 @@ FROM docker:24.0.5
 ARG TERRAFORM_VERSION=1.6.3
 ARG KOSLI_CLI_VERSION=2.6.14
 ARG SNYK_VERSION=1.1243.0
-ARG TFSH_VERSION=0.2.1
+ARG TF_SH_VERSION=0.2.1
 
-# install dependencies
+# Install dependencies
 RUN apk update \
  && apk add curl unzip sudo git bash libstdc++ libc6-compat aws-cli
 
@@ -28,6 +28,6 @@ RUN curl -L https://github.com/snyk/cli/releases/download/v${SNYK_VERSION}/snyk-
       && sudo mv ./snyk /bin/snyk
 
 # Download tf.sh
-RUN curl https://releases.fivexl.io/tf/v${TFSH_VERSION}/tf.sh --output tf.sh \
+RUN curl https://releases.fivexl.io/tf/v${TF_SH_VERSION}/tf.sh --output tf.sh \
       && chmod +x ./tf.sh \
       && sudo mv ./tf.sh /bin/tf.sh
