@@ -30,7 +30,7 @@ start-kosli-trail:
 
 wait-for-image:
   extends: [ .only-main ]
-  stage: build-image
+  stage: wait-for-image
   needs: [ start-kosli-trail ]
   services: [ "docker:24.0.5-dind" ]
   artifacts:
