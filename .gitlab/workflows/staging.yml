@@ -17,7 +17,6 @@ stages:
 variables:
   KOSLI_DRY_RUN: "False"
   KOSLI_HOST: https://staging.app.kosli.com
-  KOSLI_API_TOKEN: ${KOSLI_STAGING_API_TOKEN}
   KOSLI_ORG: cyber-dojo
   KOSLI_FLOW: version-reporter
   DOCKER_TLS_CERTDIR: "/certs"
@@ -25,6 +24,8 @@ variables:
 start-kosli-trail:
   extends: [ .only-main ]
   stage: kosli-trail
+  variables:
+    KOSLI_API_TOKEN: ${KOSLI_STAGING_API_TOKEN}
   script:
     - kosli create flow ${KOSLI_FLOW}
         --description="UX for git+image version-reporter"
