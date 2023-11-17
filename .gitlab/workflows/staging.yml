@@ -39,10 +39,14 @@ wait-for-image:
   services: [ "docker:24.0.5-dind" ]
   artifacts:
     paths: [ output/ ]
+  variables:
+    KOSLI_STAGING_API_TOKEN: ${KOSLI_STAGING_API_TOKEN}
   script:
     - ./sh/wait_for_image.sh
     - TAGGED_IMAGE=cyberdojo/version-reporter:${CI_COMMIT_SHA:0:7}
-    - kosli report artifact ${TAGGED_IMAGE} --artifact-type=docker
+    - kosli report artifact ${TAGGED_IMAGE} 
+        --artifact-type=docker
+        --api-token=${KOSLI_STAGING_API_TOKEN}
     - FINGERPRINT=$(kosli fingerprint ${TAGGED_IMAGE} --artifact-type=docker)
     - mkdir output
     - echo ${FINGERPRINT}  > output/fingerprint
@@ -55,6 +59,8 @@ branch-coverage:
   services: [ "docker:24.0.5-dind" ]
   artifacts:
     paths: [ output/ ]
+  variables:
+    KOSLI_STAGING_API_TOKEN: ${KOSLI_STAGING_API_TOKEN}
   script:
     - source ./sh/run_tests_with_coverage.sh
     - if run_tests_with_coverage; then KOSLI_COMPLIANT=true; else KOSLI_COMPLIANT=false; fi
@@ -64,6 +70,7 @@ branch-coverage:
         --description="server & client branch-coverage reports"
         --name=branch-coverage
         --user-data=./test/evidence.json
+        --api-token=${KOSLI_STAGING_API_TOKEN}
 
 security-scan:
   extends: [ .only-main ]
@@ -72,6 +79,8 @@ security-scan:
   needs: [ wait-for-image ]
   artifacts:
     paths: [ output/ ]
+  variables:
+    KOSLI_STAGING_API_TOKEN: ${KOSLI_STAGING_API_TOKEN}
   script:
     - set +e
     - snyk container test $(cat output/tagged_image)
@@ -82,6 +91,7 @@ security-scan:
         --fingerprint=$(cat output/fingerprint)
         --name=security-scan
         --scan-results=snyk.json
+        --api-token=${KOSLI_STAGING_API_TOKEN}
 
 pull-request:
   extends: [ .only-main ]
@@ -89,11 +99,14 @@ pull-request:
   needs: [ wait-for-image ]
   artifacts:
     paths: [ output/ ]
+  variables:
+    KOSLI_STAGING_API_TOKEN: ${KOSLI_STAGING_API_TOKEN}
   script:
     - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
         --fingerprint=$(cat output/fingerprint)
         --name=pull-request
         --gitlab-token=${KOSLI_GITLAB_TOKEN}
+        --api-token=${KOSLI_STAGING_API_TOKEN}
 
 sdlc-gate:
   extends: [ .only-main ]
@@ -104,9 +117,12 @@ sdlc-gate:
     - pull-request
   artifacts:
     paths: [ output/ ]
+  variables:
+    KOSLI_STAGING_API_TOKEN: ${KOSLI_STAGING_API_TOKEN}
   script:
     - kosli assert artifact $(cat output/tagged_image)
         --fingerprint=$(cat output/fingerprint)
+        --api-token=${KOSLI_STAGING_API_TOKEN}
 
 expect-beta-deployment:
   extends: [ .only-main ]
@@ -117,11 +133,13 @@ expect-beta-deployment:
     paths: [ output/ ]
   variables:
     KOSLI_ENVIRONMENT_NAME: aws-beta
+    KOSLI_STAGING_API_TOKEN: ${KOSLI_STAGING_API_TOKEN}
   script:
     - kosli expect deployment $(cat output/tagged_image)
         --fingerprint=$(cat output/fingerprint)
         --description "Deployed to ${KOSLI_ENVIRONMENT_NAME} in Gitlab pipeline"
         --environment ${KOSLI_ENVIRONMENT_NAME}
+        --api-token=${KOSLI_STAGING_API_TOKEN}
 
 approval:
   extends: [ .only-main ]
@@ -129,6 +147,8 @@ approval:
   needs: [ expect-beta-deployment ]
   artifacts:
     paths: [ output/ ]
+  variables:
+    KOSLI_STAGING_API_TOKEN: ${KOSLI_STAGING_API_TOKEN}
   script:
     - git fetch origin production # https://stackoverflow.com/questions/65686740/how-to-fetch-entire-repository-with-gitlab-ci-cd
     - kosli report approval $(cat output/tagged_image)
@@ -136,6 +156,7 @@ approval:
         --description="Approved in Gitlab pipeline"
         --oldest-commit=origin/production
         --approver="${GITLAB_USER_NAME} <${GITLAB_USER_EMAIL}>"
+        --api-token=${KOSLI_STAGING_API_TOKEN}
 
 expect-prod-deployment:
   extends: [ .only-main ]
@@ -146,8 +167,10 @@ expect-prod-deployment:
     paths: [ output/ ]
   variables:
     KOSLI_ENVIRONMENT_NAME: aws-prod
+    KOSLI_STAGING_API_TOKEN: ${KOSLI_STAGING_API_TOKEN}
   script:
     - kosli expect deployment $(cat output/tagged_image)
         --fingerprint=$(cat output/fingerprint)
         --description "Deployed to ${KOSLI_ENVIRONMENT_NAME} in Gitlab pipeline"
         --environment ${KOSLI_ENVIRONMENT_NAME}
+        --api-token=${KOSLI_STAGING_API_TOKEN}

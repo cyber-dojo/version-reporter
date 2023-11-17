@@ -13,3 +13,37 @@ To resolve this, git pushes trigger two workflows:
    - deploy the image to aws-beta/aws-prod (since prod.yml already does that)
     
 During a demo, look at prod.yml.
+
+Note:
+You cannot set the api-token like this:
+
+start-kosli-trail:
+  extends: [ .only-main ]
+  stage: kosli-trail
+  variables:
+    KOSLI_API_TOKEN: ${KOSLI_STAGING_API_TOKEN}
+  script:
+    - kosli create flow ${KOSLI_FLOW}
+        --description="UX for git+image version-reporter"
+        --template=artifact,branch-coverage,security-scan,pull-request
+
+This does not work, presumably because there is an _existing_ CI variable
+called KOSLI_API_TOKEN which, it appears, you cannot override.
+So it is being explicitly set in each kosli command:
+
+start-kosli-trail:
+  extends: [ .only-main ]
+  stage: kosli-trail
+  variables:
+    KOSLI_STAGING_API_TOKEN: ${KOSLI_STAGING_API_TOKEN}
+  script:
+    - kosli create flow ${KOSLI_FLOW}
+        --description="UX for git+image version-reporter"
+        --template=artifact,branch-coverage,security-scan,pull-request
+        --api-token=${KOSLI_STAGING_API_TOKEN}
+
+This means that you do not need to specify the KOSLI_API_TOKEN in
+the prod.yml CI workflow, which is the main one that will be looked
+at in demos.
+
+
