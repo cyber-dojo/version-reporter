@@ -4,4 +4,4 @@ stages:
 trigger_prod:
   stage: triggers
   trigger:
-    include: .gitlab/workflows/.prod.yml
+    include: .gitlab/workflows/prod.yml
