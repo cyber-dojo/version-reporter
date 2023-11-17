@@ -11,6 +11,7 @@ stages:
   - test-image
   - sdlc-gate
   - expect-beta
+  - approval
   - expect-prod
 
 variables:
@@ -125,8 +126,6 @@ approval:
   needs: [ expect-beta-deployment ]
   artifacts:
     paths: [ output/ ]
-  when: manual
-  allow_failure: false
   script:
     - git fetch origin production # https://stackoverflow.com/questions/65686740/how-to-fetch-entire-repository-with-gitlab-ci-cd
     - kosli report approval $(cat output/tagged_image)
