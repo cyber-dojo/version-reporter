@@ -1,0 +1,200 @@
+image: registry.gitlab.com/cyber-dojo/version-reporter:v1
+
+.only-main:
+  only:
+    - main
+
+stages:
+  - kosli-trail
+  - build-image
+  - test-image
+  - sdlc-gate
+  - beta
+  - approval
+  - production
+  - post-production
+
+variables:
+  KOSLI_DRY_RUN: "False"
+  KOSLI_ORG: cyber-dojo
+  KOSLI_FLOW: version-reporter
+  DOCKER_TLS_CERTDIR: "/certs"
+
+start-kosli-trail:
+  extends: [ .only-main ]
+  stage: kosli-trail
+  script:
+    - kosli create flow $KOSLI_FLOW
+        --description="UX for git+image version-reporter"
+        --template=artifact,branch-coverage,security-scan,pull-request
+
+build:
+  extends: [ .only-main ]
+  stage: build-image
+  needs: [ start-kosli-trail ]
+  services: [ "docker:24.0.5-dind" ]
+  artifacts:
+    paths: [ output/ ]
+  script:
+    - source ./sh/echo_versioner_env_vars.sh
+    - export $(echo_versioner_env_vars)
+    - docker-compose build --build-arg COMMIT_SHA=$CI_COMMIT_SHA
+    - TAGGED_IMAGE=cyberdojo/version-reporter:${CI_COMMIT_SHA:0:7}
+    - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
+    - docker push $TAGGED_IMAGE
+    - kosli report artifact $TAGGED_IMAGE --artifact-type=docker
+    - FINGERPRINT=$(kosli fingerprint $TAGGED_IMAGE --artifact-type=docker)
+    - mkdir output
+    - echo $FINGERPRINT  > output/fingerprint
+    - echo $TAGGED_IMAGE > output/tagged_image
+
+branch-coverage:
+  extends: [ .only-main ]
+  stage: test-image
+  needs: [ build ]
+  services: [ "docker:24.0.5-dind" ]
+  artifacts:
+    paths: [ output/ ]
+  script:
+    - source ./sh/run_tests_with_coverage.sh
+    - if run_tests_with_coverage; then KOSLI_COMPLIANT=true; else KOSLI_COMPLIANT=false; fi
+    - kosli report evidence artifact generic $(cat output/tagged_image)
+        --fingerprint=$(cat output/fingerprint)
+        --compliant=$KOSLI_COMPLIANT
+        --description="server & client branch-coverage reports"
+        --name=branch-coverage
+        --user-data=./test/evidence.json
+
+security-scan:
+  extends: [ .only-main ]
+  image: registry.gitlab.com/cyber-dojo/version-reporter:v1-ubuntu
+  stage: test-image
+  needs: [ build ]
+  artifacts:
+    paths: [ output/ ]
+  script:
+    - set +e
+    - snyk container test $(cat output/tagged_image)
+        --file=Dockerfile
+        --json-file-output=snyk.json
+        --policy-path=.snyk
+    - kosli report evidence artifact snyk $(cat output/tagged_image)
+        --fingerprint=$(cat output/fingerprint)
+        --name=security-scan
+        --scan-results=snyk.json
+
+pull-request:
+  extends: [ .only-main ]
+  stage: test-image
+  needs: [ build ]
+  artifacts:
+    paths: [ output/ ]
+  script:
+    - kosli report evidence artifact pullrequest gitlab $(cat output/tagged_image)
+        --fingerprint=$(cat output/fingerprint)
+        --name=pull-request
+        --gitlab-token=$KOSLI_GITLAB_TOKEN
+
+sdlc-gate:
+  extends: [ .only-main ]
+  stage: sdlc-gate
+  needs:
+    - branch-coverage
+    - security-scan
+    - pull-request
+  artifacts:
+    paths: [ output/ ]
+  script:
+    - kosli assert artifact $(cat output/tagged_image)
+        --fingerprint=$(cat output/fingerprint)
+
+beta-deployment:
+  extends: [ .only-main ]
+  stage: beta
+  needs: [ sdlc-gate ]
+  services: [ "docker:24.0.5-dind" ]
+  artifacts:
+    paths: [ output/ ]
+  variables:
+    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_BETA}
+    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_BETA}
+    KOSLI_ENVIRONMENT_NAME: aws-beta
+    ECR_REPO: 244531986313.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/version-reporter
+  script:
+    - kosli expect deployment $(cat output/tagged_image)
+        --fingerprint=$(cat output/fingerprint)
+        --description "Deployed to ${KOSLI_ENVIRONMENT_NAME} in Gitlab pipeline"
+        --environment ${KOSLI_ENVIRONMENT_NAME}
+    - docker pull $(cat output/tagged_image)
+    - export TF_VAR_TAGGED_IMAGE=${ECR_REPO}:${CI_COMMIT_SHA:0:7}
+    - docker tag $(cat output/tagged_image) ${TF_VAR_TAGGED_IMAGE}
+    - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}
+    - docker push ${TF_VAR_TAGGED_IMAGE}
+    - cd deployment/terraform && tf.sh apply
+
+approval:
+  extends: [ .only-main ]
+  stage: approval
+  needs: [ beta-deployment ]
+  artifacts:
+    paths: [ output/ ]
+  when: manual
+  allow_failure: false
+  script:
+    - git fetch origin production # https://stackoverflow.com/questions/65686740/how-to-fetch-entire-repository-with-gitlab-ci-cd
+    - kosli report approval $(cat output/tagged_image)
+        --fingerprint=$(cat output/fingerprint)
+        --description="Approved in Gitlab pipeline"
+        --oldest-commit=origin/production
+        --approver="${GITLAB_USER_NAME} <${GITLAB_USER_EMAIL}>"
+
+prod-deployment:
+  extends: [ .only-main ]
+  stage: production
+  needs: [ approval ]
+  services: [ "docker:24.0.5-dind" ]
+  artifacts:
+    paths: [ output/ ]
+  variables:
+    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_PROD}
+    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_PROD}
+    KOSLI_ENVIRONMENT_NAME: aws-prod
+    ECR_REPO: 274425519734.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/version-reporter
+  script:
+    - kosli expect deployment $(cat output/tagged_image)
+        --fingerprint=$(cat output/fingerprint)
+        --description "Deployed to ${KOSLI_ENVIRONMENT_NAME} in Gitlab pipeline"
+        --environment ${KOSLI_ENVIRONMENT_NAME}
+    - docker pull $(cat output/tagged_image)
+    - export TF_VAR_TAGGED_IMAGE=${ECR_REPO}:${CI_COMMIT_SHA:0:7}
+    - docker tag $(cat output/tagged_image) ${TF_VAR_TAGGED_IMAGE}
+    - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}
+    - docker push ${TF_VAR_TAGGED_IMAGE}
+    - cd deployment/terraform && tf.sh apply
+
+update-git-tracking-branch:
+  extends: [ .only-main ]
+  stage: post-production
+  needs: [ prod-deployment ]
+  script:
+    - git fetch origin production
+    - git log --graph --full-history --all --color --date=short --pretty=format:"%Cred%x09%h %Creset%ad%Cblue%d %Creset %s %C(bold)(%an)%Creset" | head -n 30
+    - git checkout production
+    - git merge --ff-only ${CI_COMMIT_SHA}
+    - git config user.email "project_51960773_bot_30199361277f8228ac9a2b9bfeb562d8@noreply.gitlab.com"
+    - git config user.name "project_51960773_bot_30199361277f8228ac9a2b9bfeb562d8"
+    - git remote add gitlab_origin https://oauth2:$KOSLI_GITLAB_TOKEN@gitlab.com/cyber-dojo/version-reporter.git
+    - git push gitlab_origin production
+
+push-latest-image-to-public-registry:
+  extends: [ .only-main ]
+  stage: post-production
+  needs: [ prod-deployment ]
+  services: [ "docker:24.0.5-dind" ]
+  artifacts:
+    paths: [ output/ ]
+  script:
+    - docker pull $(cat output/tagged_image)
+    - docker tag $(cat output/tagged_image) cyberdojo/version-reporter:latest
+    - echo "${DOCKER_PASS}" | docker login --username "${DOCKER_USER}" --password-stdin
+    - docker push cyberdojo/version-reporter:latest
