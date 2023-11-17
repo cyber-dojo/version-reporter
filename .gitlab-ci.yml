@@ -5,3 +5,8 @@ trigger_prod:
   stage: triggers
   trigger:
     include: .gitlab/workflows/prod.yml
+
+trigger_staging:
+  stage: triggers
+  trigger:
+    include: .gitlab/workflows/staging.yml
