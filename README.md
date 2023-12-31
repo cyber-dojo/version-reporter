@@ -1,3 +1,6 @@
+The version-reporter service has been retired.  
+Before that it was moved to [Gitlab](https://gitlab.com/cyber-dojo/version-reporter).  
+
 [![Github Action (main)](https://github.com/cyber-dojo/version-reporter/actions/workflows/main.yml/badge.svg)](https://github.com/cyber-dojo/version-reporter/actions)
 
 - A [docker-containerized](https://hub.docker.com/r/cyberdojo/version-reporter/tags) micro-service for [https://cyber-dojo.org](http://cyber-dojo.org).
